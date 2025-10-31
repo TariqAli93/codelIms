@@ -1,0 +1,40 @@
+import { defineStore } from 'pinia';
+
+export const useNotificationStore = defineStore('notification', {
+  state: () => ({
+    show: false,
+    message: '',
+    type: 'info', // success, error, warning, info
+    timeout: 4000,
+    position: 'top',
+  }),
+
+  actions: {
+    showNotification({ message, type = 'info', timeout = 4000 }) {
+      this.message = message;
+      this.type = type;
+      this.timeout = timeout;
+      this.show = true;
+    },
+
+    success(message, timeout = 3000) {
+      this.showNotification({ message, type: 'success', timeout });
+    },
+
+    error(message, timeout = 5000) {
+      this.showNotification({ message, type: 'error', timeout });
+    },
+
+    warning(message, timeout = 4000) {
+      this.showNotification({ message, type: 'warning', timeout });
+    },
+
+    info(message, timeout = 3000) {
+      this.showNotification({ message, type: 'info', timeout });
+    },
+
+    hide() {
+      this.show = false;
+    },
+  },
+});

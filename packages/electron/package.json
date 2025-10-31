@@ -1,0 +1,39 @@
+{
+  "name": "@codelims/electron",
+  "version": "1.0.0",
+  "description": "CodeLIMS Electron - Electron + Vue 3 + Vuetify",
+  "main": "main.js",
+  "type": "module",
+  "scripts": {
+    "dev": "electron .",
+    "build": "vite build && electron-builder",
+    "lint": "eslint .",
+    "format": "prettier --write ."
+  },
+  "build": {
+    "appId": "com.codelims.app",
+    "productName": "CodeLIMS",
+    "directories": {
+      "output": "dist-electron"
+    },
+    "files": [
+      "electron/**/*",
+      "../frontend/dist/**/*",
+      "../backend/dist/**/*"
+    ],
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "icon": "public/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  },
+  "devDependencies": {
+    "electron": "^39.0.0",
+    "electron-builder": "^25.1.8"
+  }
+}

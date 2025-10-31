@@ -1,0 +1,39 @@
+{
+  "name": "codelims",
+  "version": "1.0.0",
+  "description": "Accounting & POS System - Desktop Application",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently \"pnpm --filter frontend dev\" \"pnpm --filter backend dev\" \"wait-on http://localhost:5173 && pnpm --filter @codelims/electron dev\"",
+    "dev:backend": "pnpm --filter backend dev",
+    "build": "pnpm --filter backend build && pnpm --filter frontend build",
+    "build:electron": "pnpm --filter frontend build:electron",
+    "dev:electron": "concurrently \"pnpm --filter backend dev\" \"pnpm --filter frontend dev\" \"wait-on http://localhost:5173 && pnpm --filter @codelims/electron dev\"",
+    "build:all": "pnpm --filter backend build && pnpm --filter frontend build && pnpm --filter @codelims/electron build",
+    "lint": "pnpm -r lint",
+    "format": "pnpm -r format",
+    "seed": "node ./packages/backend/src/seed.js"
+  },
+  "keywords": [
+    "accounting",
+    "pos",
+    "installment",
+    "electron",
+    "vue",
+    "fastify"
+  ],
+  "author": "CodeLIMS Team",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^9.1.0",
+    "eslint": "^9.15.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-vue": "^9.31.0",
+    "prettier": "^3.3.3"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  }
+}
