@@ -104,6 +104,7 @@ export const sales = sqliteTable('sales', {
   total: real('total').notNull(),
   currency: text('currency').notNull().default('USD'),
   exchangeRate: real('exchange_rate').default(1),
+  interestRate: real('interest_rate').default(0), // New field for interest rate
   paymentType: text('payment_type').notNull(), // 'cash', 'installment', 'mixed'
   paidAmount: real('paid_amount').default(0),
   remainingAmount: real('remaining_amount').default(0),

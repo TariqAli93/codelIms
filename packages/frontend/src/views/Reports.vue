@@ -336,8 +336,6 @@ const fetchReport = async () => {
       currency: filters.value.currency,
     });
 
-    console.log(report.value);
-
     notificationStore.success('تم تحميل التقرير بنجاح');
   } catch {
     notificationStore.error('حدث خطأ أثناء تحميل التقرير');

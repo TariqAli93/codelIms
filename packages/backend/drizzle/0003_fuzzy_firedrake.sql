@@ -1,0 +1,1 @@
+ALTER TABLE `sales` ADD `interest_rate` real DEFAULT 0;

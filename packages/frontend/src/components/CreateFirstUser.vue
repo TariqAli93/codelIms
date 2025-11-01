@@ -144,8 +144,6 @@ async function checkInitialSetup() {
   try {
     const response = await authStore.fetchInitialSetupInfo();
 
-    console.log('Initial Setup Info:', response);
-
     if (response.isFirstRun) {
       setupInfo.value = response;
       isFirstRunDialog.value = true;

@@ -16,15 +16,13 @@ export class RoleService {
       .insert(roles)
       .values({ name: data.name, description: data.description })
       .returning();
-    await db
-      .insert(activityLogs)
-      .values({
-        userId: actorId,
-        action: 'create',
-        resource: 'roles',
-        resourceId: role.id,
-        details: `Created role ${role.name}`,
-      });
+    await db.insert(activityLogs).values({
+      userId: actorId,
+      action: 'create',
+      resource: 'roles',
+      resourceId: role.id,
+      details: `Created role ${role.name}`,
+    });
     return role;
   }
 
@@ -34,15 +32,13 @@ export class RoleService {
       .update(roles)
       .set({ name: data.name, description: data.description })
       .where(eq(roles.id, id));
-    await db
-      .insert(activityLogs)
-      .values({
-        userId: actorId,
-        action: 'update',
-        resource: 'roles',
-        resourceId: id,
-        details: `Updated role ${id}`,
-      });
+    await db.insert(activityLogs).values({
+      userId: actorId,
+      action: 'update',
+      resource: 'roles',
+      resourceId: id,
+      details: `Updated role ${id}`,
+    });
     return this.getById(id);
   }
 
@@ -56,15 +52,13 @@ export class RoleService {
     await this.getById(id);
     // Safe delete not implemented; in production prefer soft delete
     await db.delete(roles).where(eq(roles.id, id));
-    await db
-      .insert(activityLogs)
-      .values({
-        userId: actorId,
-        action: 'delete',
-        resource: 'roles',
-        resourceId: id,
-        details: `Deleted role ${id}`,
-      });
+    await db.insert(activityLogs).values({
+      userId: actorId,
+      action: 'delete',
+      resource: 'roles',
+      resourceId: id,
+      details: `Deleted role ${id}`,
+    });
     return { success: true };
   }
 
@@ -77,15 +71,13 @@ export class RoleService {
     if (values.length) {
       await db.insert(rolePermissions).values(values);
     }
-    await db
-      .insert(activityLogs)
-      .values({
-        userId: actorId,
-        action: 'assign_permissions',
-        resource: 'roles',
-        resourceId: roleId,
-        details: `Assigned ${values.length} permissions`,
-      });
+    await db.insert(activityLogs).values({
+      userId: actorId,
+      action: 'assign_permissions',
+      resource: 'roles',
+      resourceId: roleId,
+      details: `Assigned ${values.length} permissions`,
+    });
     return { success: true };
   }
 

@@ -24,7 +24,6 @@ export const useProductStore = defineStore('product', {
         this.products = response.data;
         this.pagination = response.meta;
 
-        console.log(response);
         return response;
       } catch (error) {
         notificationStore.error(error.response?.data?.message || 'فشل تحميل المنتجات');
@@ -39,7 +38,7 @@ export const useProductStore = defineStore('product', {
       const notificationStore = useNotificationStore();
       try {
         const response = await api.get(`/products/${id}`);
-        console.log(response);
+
         this.currentProduct = response.data;
         return response;
       } catch (error) {
@@ -106,7 +105,7 @@ export const useProductStore = defineStore('product', {
       const notificationStore = useNotificationStore();
       try {
         const response = await api.get('/products/low-stock');
-        console.log(response);
+
         return response.data;
       } catch (error) {
         notificationStore.error(

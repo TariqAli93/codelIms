@@ -62,6 +62,30 @@
         <template v-slot:[`item.paymentType`]="{ item }">
           {{ getPaymentTypeText(item.paymentType) }}
         </template>
+
+        <template v-slot:[`item.actions`]="{ item }">
+          <v-btn
+            size="small"
+            variant="elevated"
+            color="error"
+            v-if="item.status !== 'cancelled'"
+            icon
+            @click.stop="deleteSale(item.id)"
+          >
+            <v-icon>mdi-delete</v-icon>
+          </v-btn>
+
+          <v-btn
+            size="small"
+            variant="elevated"
+            color="success"
+            v-if="item.status === 'cancelled'"
+            icon
+            @click.stop="restoreSale(item.id)"
+          >
+            <v-icon>mdi-restore</v-icon>
+          </v-btn>
+        </template>
       </v-data-table>
     </v-card>
   </div>
@@ -94,6 +118,7 @@ const headers = [
   { title: 'نوع الدفع', key: 'paymentType' },
   { title: 'الحالة', key: 'status' },
   { title: 'التاريخ', key: 'createdAt' },
+  { title: 'الاجرائات', key: 'actions', sortable: false },
 ];
 
 const formatCurrency = (amount, currency) => {
@@ -138,6 +163,20 @@ const handleFilter = () => {
 
 const viewSale = (event, { item }) => {
   router.push({ name: 'SaleDetails', params: { id: item.id } });
+};
+
+const deleteSale = async (id) => {
+  if (confirm('هل أنت متأكد من رغبتك في إلغاء هذه المبيعات؟')) {
+    await saleStore.cancelSale(id);
+    handleFilter();
+  }
+};
+
+const restoreSale = async (id) => {
+  if (confirm('هل أنت متأكد من رغبتك في استعادة هذه المبيعات؟')) {
+    await saleStore.restoreSale(id);
+    handleFilter();
+  }
 };
 
 onMounted(() => {

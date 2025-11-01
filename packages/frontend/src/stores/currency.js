@@ -38,7 +38,6 @@ export const useCurrencyStore = defineStore('currency', {
       try {
         const response = await api.get('/currencies/active');
         this.currencies = response.data;
-        console.log('Fetched active currencies:', this.currencies);
       } catch (error) {
         notificationStore.error(error.response?.data?.message || 'فشل تحميل العملات النشطة');
         throw error;

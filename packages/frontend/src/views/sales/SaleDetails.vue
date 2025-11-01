@@ -2,7 +2,7 @@
   <div>
     <div class="d-flex justify-space-between align-center mb-4">
       <v-btn prepend-icon="mdi-arrow-right" variant="text" @click="$router.back()">رجوع</v-btn>
-      <v-btn color="primary" prepend-icon="mdi-printer" @click="printInvoice">طباعة الفاتورة</v-btn>
+      <v-btn color="primary" prepend-icon="mdi-printer" @click="handlePrint">طباعة الفاتورة</v-btn>
     </div>
 
     <v-card v-if="sale" class="mb-4">
@@ -251,6 +251,10 @@
         </v-form>
       </v-card-text>
     </v-card>
+
+    <div id="invoiceComponent" ref="invoiceComponent">
+      <sale-details-invoice v-if="sale" :sale="sale" />
+    </div>
   </div>
 </template>
 
@@ -259,12 +263,15 @@ import { ref, onMounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { useSaleStore } from '@/stores/sale';
 import { useNotificationStore } from '@/stores/notification';
+import SaleDetailsInvoice from '@/components/SaleDetailsInvoice.vue';
+import { useVueToPrint } from 'vue-to-print';
 
 const route = useRoute();
 const saleStore = useSaleStore();
 const notificationStore = useNotificationStore();
 const sale = ref(null);
 const loadingPayment = ref(false);
+const invoiceComponent = ref(null);
 
 const paymentData = ref({
   amount: null,
@@ -294,15 +301,6 @@ const hasInstallments = computed(() => {
 const formatCurrency = (amount, currency) => {
   const symbol = currency === 'USD' ? '$' : 'IQD';
   return `${symbol} ${parseFloat(amount || 0).toLocaleString()}`;
-};
-
-const formatDate = (date) => {
-  if (!date) return '-';
-  return new Date(date).toLocaleDateString('ar-IQ', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
 };
 
 const getStatusColor = (status) => {
@@ -387,7 +385,6 @@ const addPayment = async () => {
     }
 
     paymentData.value.currency = sale.value.currency;
-    console.log('DEBUG paymentData:', JSON.stringify(paymentData.value));
     await saleStore.addPayment(paymentData.value);
     notificationStore.success('تم إضافة الدفعة بنجاح');
     const response = await saleStore.fetchSale(route.params.id);
@@ -398,8 +395,6 @@ const addPayment = async () => {
       currency: sale.value.currency,
       notes: '',
     };
-
-    console.log('Updated sale after payment:', sale.value);
   } catch (error) {
     notificationStore.error('فشل في إضافة الدفعة');
     console.error('Error adding payment:', error);
@@ -408,9 +403,15 @@ const addPayment = async () => {
   }
 };
 
-const printInvoice = () => {
-  window.print();
-};
+const { handlePrint } = useVueToPrint({
+  content: invoiceComponent,
+  documentTitle: () => {
+    if (sale.value) {
+      return `فاتورة-${sale.value.invoiceNumber}`;
+    }
+    return 'فاتورة';
+  },
+});
 
 onMounted(async () => {
   try {
@@ -426,9 +427,17 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+#invoiceComponent {
+  display: none !important;
+}
+
 @media print {
   .v-btn {
     display: none !important;
+  }
+
+  #invoiceComponent {
+    display: block !important;
   }
 }
 </style>

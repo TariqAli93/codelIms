@@ -1,9 +1,8 @@
-import db, { saveDatabase } from '../db.js';
+import db from '../db.js';
 import { sales, saleItems, products, customers, payments, installments } from '../models/index.js';
 import { NotFoundError, ValidationError } from '../utils/errors.js';
 import { generateInvoiceNumber, calculateSaleTotals } from '../utils/helpers.js';
 import { eq, desc, and, or, gte, lte, count, sql, inArray } from 'drizzle-orm';
-import { CurrencyConversionService } from './currencyConversionService.js';
 
 export class SaleService {
   async create(saleData, userId) {
@@ -131,9 +130,6 @@ export class SaleService {
         .where(eq(customers.id, saleData.customerId));
     }
 
-    // Save database to persist changes
-    saveDatabase();
-
     return await this.getById(newSale.id);
   }
 
@@ -200,6 +196,7 @@ export class SaleService {
         invoiceNumber: sales.invoiceNumber,
         customerId: sales.customerId,
         customerName: customers.name,
+        customerPhone: customers.phone,
         subtotal: sales.subtotal,
         discount: sales.discount,
         tax: sales.tax,
@@ -325,9 +322,6 @@ export class SaleService {
       }
     }
 
-    // Save database
-    saveDatabase();
-
     return await this.getById(saleId);
   }
 
@@ -396,15 +390,11 @@ export class SaleService {
       .where(eq(sales.id, id))
       .returning();
 
-    // Save database
-    saveDatabase();
-
     return updated;
   }
 
   async getSalesReport(filters = {}) {
     const { startDate, endDate, currency } = filters;
-    const currencyService = new CurrencyConversionService();
 
     const toYmd = (d) => (d ? new Date(d).toISOString().split('T')[0] : null);
     const start = toYmd(startDate);
@@ -511,8 +501,6 @@ export class SaleService {
     };
   }
 
-  // const response = await api.post(`/sales/${this.currentSale.id}/payments`, paymentData);
-
   async removePayment(saleId, paymentId, userId) {
     const [payment] = await db.select().from(payments).where(eq(payments.id, paymentId)).limit(1);
 
@@ -525,8 +513,95 @@ export class SaleService {
       throw new Error('Unauthorized');
     }
 
-    await db.delete().from(payments).where(eq(payments.id, paymentId));
+    await db.delete(payments).where(eq(payments.id, paymentId));
 
     return payment;
+  }
+
+  // db.delete(...).from is not a function
+  async removeSale(saleId) {
+    const sale = await this.getById(saleId);
+
+    if (!sale) {
+      throw new NotFoundError('Sale');
+    }
+
+    // Delete related payments
+    await db.delete(payments).where(eq(payments.saleId, saleId));
+
+    // Delete related installments
+    await db.delete(installments).where(eq(installments.saleId, saleId));
+
+    // Delete related sale items
+    await db.delete(saleItems).where(eq(saleItems.saleId, saleId));
+
+    // Delete the sale itself
+    await db.delete(sales).where(eq(sales.id, saleId));
+
+    return sale;
+  }
+
+  async restoreSale(saleId) {
+    // restore sale by setting its status back to 'completed' and adjusting stock and customer debt accordingly
+    const sale = await this.getById(saleId);
+
+    if (!sale) {
+      throw new NotFoundError('Sale');
+    }
+
+    if (sale.status !== 'cancelled') {
+      throw new ValidationError('Only cancelled sales can be restored');
+    }
+
+    // Adjust stock for each sale item
+    for (const item of sale.items) {
+      const [product] = await db
+        .select()
+        .from(products)
+        .where(eq(products.id, item.productId))
+        .limit(1);
+
+      if (product) {
+        await db
+          .update(products)
+          .set({
+            stock: product.stock - item.quantity,
+            updatedAt: new Date().toISOString(),
+          })
+          .where(eq(products.id, item.productId));
+      }
+    }
+
+    // Update customer debt
+    if (sale.customerId && sale.remainingAmount > 0) {
+      await db
+        .update(customers)
+        .set({
+          totalDebt: customers.totalDebt + sale.remainingAmount,
+          totalPurchases: customers.totalPurchases + sale.total,
+        })
+        .where(eq(customers.id, sale.customerId));
+    }
+
+    // Restore sale status
+    const [updated] = await db
+      .update(sales)
+      .set({
+        status: sale.remainingAmount <= 0 ? 'completed' : 'pending',
+        updatedAt: new Date().toISOString(),
+      })
+      .where(eq(sales.id, saleId))
+      .returning();
+
+    // Restore pending installments
+    await db
+      .update(installments)
+      .set({
+        status: 'pending',
+        updatedAt: new Date().toISOString(),
+      })
+      .where(and(eq(installments.saleId, saleId), eq(installments.status, 'cancelled')));
+
+    return updated;
   }
 }

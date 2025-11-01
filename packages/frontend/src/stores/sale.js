@@ -137,5 +137,39 @@ export const useSaleStore = defineStore('sale', {
         this.loading = false;
       }
     },
+
+    async deleteSale(id) {
+      this.loading = true;
+      const notificationStore = useNotificationStore();
+      try {
+        await api.delete(`/sales/${id}`);
+        this.sales = this.sales.filter((s) => s.id !== id);
+        notificationStore.success('تم حذف المبيعة بنجاح');
+      } catch (error) {
+        notificationStore.error(error.response?.data?.message || 'فشل حذف المبيعة');
+        throw error;
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async restoreSale(id) {
+      this.loading = true;
+      const notificationStore = useNotificationStore();
+      try {
+        const response = await api.post(`/sales/${id}/restore`);
+        const index = this.sales.findIndex((s) => s.id === id);
+        if (index !== -1) {
+          this.sales[index].status = 'completed';
+        }
+        notificationStore.success('تم استعادة المبيعة بنجاح');
+        return response;
+      } catch (error) {
+        notificationStore.error(error.response?.data?.message || 'فشل استعادة المبيعة');
+        throw error;
+      } finally {
+        this.loading = false;
+      }
+    },
   },
 });

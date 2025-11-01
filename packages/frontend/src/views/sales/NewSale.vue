@@ -7,7 +7,8 @@
         <v-form ref="form">
           <v-row>
             <v-col cols="12" md="6">
-              <v-select
+              <!-- =======  العميل ======= -->
+              <v-combobox
                 v-model="saleData.customerId"
                 :items="customers"
                 item-title="name"
@@ -24,7 +25,7 @@
                     @click="openCustomerDialog"
                   ></v-btn>
                 </template>
-              </v-select>
+              </v-combobox>
             </v-col>
             <v-col cols="12" md="6">
               <v-select
@@ -44,10 +45,10 @@
             v-model="scannedBarcode"
             label="قراءة الباركود"
             prepend-inner-icon="mdi-barcode-scan"
-            @keyup.enter="handleBarcodeScan"
             autofocus
             clearable
             class="mb-4"
+            @keyup.enter="handleBarcodeScan"
           />
 
           <div v-for="(item, index) in saleData.items" :key="index" class="mb-4">
@@ -128,17 +129,24 @@
                 type="number"
               ></v-text-field>
             </v-col>
-            <v-col
-              v-if="saleData.paymentType === 'installment' || saleData.paymentType === 'mixed'"
-              cols="12"
-              md="3"
-            >
+            <v-col v-if="saleData.paymentType === 'installment'" cols="12" md="3">
               <v-text-field
                 v-model.number="saleData.installmentCount"
                 label="عدد الأقساط"
                 type="number"
                 min="1"
                 :rules="[rules.required]"
+              ></v-text-field>
+            </v-col>
+
+            <v-col v-if="saleData.paymentType === 'installment'" cols="12" md="3">
+              <!-- الفائدة الثابتة على قيمة المنتج بمعنى في حال دفع اقساط يتم تحميل المبلغ قيمة ماليه إضافية على اجمالي المبلغ يعني لو المنتج ب 1000 يصير بالاقساط ب 1200 -->
+              <v-text-field
+                :model-value="
+                  saleData.interestRate ? ((total * saleData.interestRate) / 100).toFixed(2) : 0
+                "
+                label="قيمة الفائدة"
+                readonly
               ></v-text-field>
             </v-col>
           </v-row>
@@ -232,6 +240,11 @@ const customers = ref([]);
 // ✅ متغير للباركود
 const scannedBarcode = ref('');
 
+const paymentTypes = [
+  { title: 'نقدي', value: 'cash' },
+  { title: 'تقسيط', value: 'installment' },
+];
+
 const saleData = ref({
   customerId: null,
   currency: 'IQD',
@@ -241,6 +254,7 @@ const saleData = ref({
   paymentType: 'cash',
   paidAmount: 0,
   installmentCount: 3,
+  interestRate: paymentTypes.find((type) => type.value === 'installment') ? 25 : 0,
 });
 
 const newCustomer = ref({
@@ -248,12 +262,6 @@ const newCustomer = ref({
   phone: '',
   address: '',
 });
-
-const paymentTypes = [
-  { title: 'نقدي', value: 'cash' },
-  { title: 'تقسيط', value: 'installment' },
-  { title: 'مختلط', value: 'mixed' },
-];
 
 const rules = {
   required: (v) => !!v || v === 0 || 'هذا الحقل مطلوب',

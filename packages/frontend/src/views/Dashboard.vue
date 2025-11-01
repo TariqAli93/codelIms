@@ -11,7 +11,7 @@
         <div class="flex items-center justify-between">
           <div>
             <p class="text-sm font-medium opacity-90 mb-1">إجمالي المبيعات</p>
-            <h3 class="text-4xl font-bold">{{ stats.totalSales }}</h3>
+            <h3 class="text-4xl font-bold">{{ countSales }}</h3>
           </div>
           <div class="bg-white bg-opacity-20 rounded-full p-4">
             <v-icon size="40" color="blue">mdi-cash-multiple</v-icon>
@@ -256,6 +256,8 @@ const stats = ref({
 });
 const recentSales = ref([]);
 
+const countSales = ref(0);
+
 const quickActions = [
   { title: 'بيع جديد', icon: 'mdi-plus-circle', to: '/sales/new', permission: 'create:sales' },
   {
@@ -310,9 +312,17 @@ const getStatusText = (status) => {
 onMounted(async () => {
   loading.value = true;
   try {
-    // Fetch recent sales
+    // Fetch sales stats completed || pending
     const salesResponse = await saleStore.fetchSales();
-    recentSales.value = salesResponse.data || [];
+
+    recentSales.value =
+      salesResponse.data.filter(
+        (sale) => sale.status === 'completed' || sale.status === 'pending'
+      ) || [];
+
+    countSales.value = recentSales.value.length;
+
+    console.log('Recent Sales:', recentSales.value);
 
     // Fetch low stock products
     const lowStockProducts = await productStore.fetchLowStock({ lowStock: true });
@@ -323,7 +333,7 @@ onMounted(async () => {
     const customers = await customerStore.fetchCustomers();
 
     stats.value = {
-      totalSales: salesResponse.meta?.total || 0,
+      totalSales: salesResponse.length || 0,
       totalCustomers: customers.data.length || 0,
       totalProducts: products.data.length || 0,
       lowStock: lowStockProducts?.length || 0,

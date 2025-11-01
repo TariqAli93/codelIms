@@ -4,7 +4,6 @@ import config from './config.js';
 import securityPlugin from './plugins/security.js';
 import authPlugin from './plugins/auth.js';
 import errorHandlerPlugin from './plugins/errorHandler.js';
-// import ensureDatabasePlugin from './plugins/ensureDatabase.js';
 
 // Routes
 import authRoutes from './routes/authRoutes.js';

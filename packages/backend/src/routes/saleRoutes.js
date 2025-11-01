@@ -63,6 +63,26 @@ export default async function saleRoutes(fastify) {
     },
   });
 
+  fastify.delete('/:id', {
+    onRequest: [fastify.authorize('sales:delete')],
+    handler: saleController.removeSale,
+    schema: {
+      description: 'Remove sale',
+      tags: ['sales'],
+      security: [{ bearerAuth: [] }],
+    },
+  });
+
+  fastify.post('/:id/restore', {
+    onRequest: [fastify.authorize('sales:update')],
+    handler: saleController.restoreSale,
+    schema: {
+      description: 'Restore cancelled sale',
+      tags: ['sales'],
+      security: [{ bearerAuth: [] }],
+    },
+  });
+
   fastify.post('/:saleId/payment', {
     onRequest: [fastify.authorize('sales:update')],
     handler: saleController.addPayment,

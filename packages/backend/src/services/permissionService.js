@@ -32,15 +32,13 @@ export class PermissionService {
         description: data.description,
       })
       .returning();
-    await db
-      .insert(activityLogs)
-      .values({
-        userId: actorId,
-        action: 'create',
-        resource: 'permissions',
-        resourceId: perm.id,
-        details: `Created permission ${perm.name}`,
-      });
+    await db.insert(activityLogs).values({
+      userId: actorId,
+      action: 'create',
+      resource: 'permissions',
+      resourceId: perm.id,
+      details: `Created permission ${perm.name}`,
+    });
     return perm;
   }
 
@@ -55,30 +53,26 @@ export class PermissionService {
         description: data.description,
       })
       .where(eq(permissions.id, id));
-    await db
-      .insert(activityLogs)
-      .values({
-        userId: actorId,
-        action: 'update',
-        resource: 'permissions',
-        resourceId: id,
-        details: `Updated permission ${id}`,
-      });
+    await db.insert(activityLogs).values({
+      userId: actorId,
+      action: 'update',
+      resource: 'permissions',
+      resourceId: id,
+      details: `Updated permission ${id}`,
+    });
     return this.getById(id);
   }
 
   async remove(id, actorId) {
     await this.getById(id);
     await db.delete(permissions).where(eq(permissions.id, id));
-    await db
-      .insert(activityLogs)
-      .values({
-        userId: actorId,
-        action: 'delete',
-        resource: 'permissions',
-        resourceId: id,
-        details: `Deleted permission ${id}`,
-      });
+    await db.insert(activityLogs).values({
+      userId: actorId,
+      action: 'delete',
+      resource: 'permissions',
+      resourceId: id,
+      details: `Deleted permission ${id}`,
+    });
     return { success: true };
   }
 }

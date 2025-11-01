@@ -28,7 +28,15 @@
               ></v-select>
             </v-col>
             <v-col cols="12" md="6">
-              <v-text-field v-model="formData.barcode" label="الباركود"></v-text-field>
+              <v-text-field
+                v-model="formData.barcode"
+                label="قراءة الباركود"
+                prepend-inner-icon="mdi-barcode-scan"
+                autofocus
+                clearable
+                class="mb-4"
+                @keyup.enter="handleBarcodeScan"
+              />
             </v-col>
             <v-col cols="12" md="6">
               <v-text-field
@@ -151,6 +159,11 @@ const handleSubmit = async () => {
   } finally {
     loading.value = false;
   }
+};
+
+const handleBarcodeScan = () => {
+  const code = formData.value?.barcode?.trim();
+  if (!code) return;
 };
 
 onMounted(async () => {

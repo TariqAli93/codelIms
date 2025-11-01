@@ -95,4 +95,22 @@ export class SaleController {
       },
     });
   }
+
+  async removeSale(request, reply) {
+    const sale = await saleService.removeSale(request.params.id);
+    return reply.send({
+      success: true,
+      data: sale,
+      message: 'Sale removed successfully',
+    });
+  }
+
+  async restoreSale(request, reply) {
+    const sale = await saleService.restoreSale(request.params.id);
+    return reply.send({
+      success: true,
+      data: sale,
+      message: 'Sale restored successfully',
+    });
+  }
 }
