@@ -25,15 +25,21 @@ const lightTheme = {
 const darkTheme = {
   dark: true,
   colors: {
-    primary: '#2196F3',
-    secondary: '#616161',
-    accent: '#82B1FF',
-    error: '#FF5252',
-    info: '#2196F3',
-    success: '#4CAF50',
-    warning: '#FFC107',
-    background: '#121212',
-    surface: '#1E1E1E',
+    primary: '#7B5CFF', // Violet Blue modern
+    secondary: '#3A3A3D', // Soft graphite
+    accent: '#9D8CFF', // Light violet accent
+    error: '#FF5C5C', // Soft red (less aggressive)
+    info: '#4DA3FF', // Calm info blue
+    success: '#4ED48A', // Fresh green
+    warning: '#FFC85C', // Amber gold
+    background: '#0F0F12', // Deep matte dark
+    surface: '#1A1A1F', // Modern elevated dark
+    'surface-darken-1': '#242429',
+    'surface-darken-2': '#2E2E33',
+    'surface-darken-3': '#38383E',
+    'surface-lighten-1': '#121216',
+    'surface-lighten-2': '#141418',
+    'surface-lighten-3': '#16161A',
   },
 };
 

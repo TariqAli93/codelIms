@@ -52,7 +52,7 @@
     </v-card>
 
     <!-- 🔹 جدول المستخدمين -->
-    <v-card elevation="6" rounded="lg">
+    <v-card>
       <v-data-table
         :items="store.list"
         :loading="store.loading"

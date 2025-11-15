@@ -6,6 +6,16 @@
 @use 'abstracts' as *;
 
 // ============================================
+// 0. Base Tweaks
+// ============================================
+
+// تجنّب التأثير على كل العناصر بـ `*`
+// نخلي الأساس على التطبيق الرئيسي فقط
+.v-application {
+  font-size: $font-size-sm;
+}
+
+// ============================================
 // 1. v-card Overrides
 // ============================================
 
@@ -29,29 +39,19 @@
 }
 
 // ============================================
-// 2. v-btn Overrides
+// 2. v-data-table Overrides
 // ============================================
 
-// .v-btn {
-//   text-transform: none !important;
-//   letter-spacing: normal !important;
-
-//   &.rounded-pill {
-//     border-radius: $border-radius-full !important;
-//   }
-// }
-
-// ============================================
-// 3. v-data-table Overrides
-// ============================================
+$v-data-table-header-bg-light: rgba(0, 0, 0, 0.02);
+$v-data-table-header-bg-dark: rgba(255, 255, 255, 0.02);
 
 .v-data-table {
   .v-data-table__th {
     font-weight: $font-weight-semibold !important;
-    background-color: rgba(0, 0, 0, 0.02) !important;
+    background-color: $v-data-table-header-bg-light !important;
 
     @include dark-theme {
-      background-color: rgba(255, 255, 255, 0.02) !important;
+      background-color: $v-data-table-header-bg-dark !important;
     }
   }
 
@@ -59,17 +59,17 @@
     @include transition(background-color);
 
     &:hover {
-      background-color: rgba(0, 0, 0, 0.02);
+      background-color: $v-data-table-header-bg-light !important;
 
       @include dark-theme {
-        background-color: rgba(255, 255, 255, 0.02);
+        background-color: $v-data-table-header-bg-dark !important;
       }
     }
   }
 }
 
 // ============================================
-// 4. v-text-field Overrides
+// 3. v-text-field Overrides
 // ============================================
 
 .v-text-field {
@@ -79,7 +79,7 @@
 }
 
 // ============================================
-// 5. v-navigation-drawer Overrides
+// 4. v-navigation-drawer Overrides
 // ============================================
 
 .v-navigation-drawer {
@@ -88,10 +88,104 @@
   @include dark-theme {
     @include custom-scrollbar(6px, transparent, rgba(255, 255, 255, 0.2));
   }
+
+  .v-list {
+    // تخصيص عناصر القائمة
+    .v-list-item {
+      font-size: $font-size-xs !important;
+      opacity: 0.9 !important;
+
+      .v-list-item-icon {
+        position: relative;
+        background: transparent;
+        width: 42px;
+        height: 42px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: $border-radius-md;
+        font-size: $font-size-sm !important;
+        @include transition(all);
+
+        &::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          background-color: rgba(var(--v-theme-primary), 0);
+          visibility: hidden;
+          opacity: 0;
+          transform: scale(0.85);
+          border-radius: $border-radius-md;
+          @include transition(all);
+        }
+      }
+
+      &.active-nav-item {
+        color: rgba(var(--v-theme-primary), 1);
+
+        .v-list-item-icon {
+          &::before {
+            background-color: rgba(var(--v-theme-primary), 0.1);
+            visibility: visible;
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+
+        @include dark-theme {
+          .v-list-item-icon {
+            color: rgba(var(--v-theme-primary), 1);
+
+            &::before {
+              background-color: rgba(var(--v-theme-primary), 0.1);
+            }
+          }
+        }
+      }
+    }
+
+    // تخصيص مجموعات القوائم
+    .v-list-group {
+      &.custom-group {
+        border-radius: $border-radius-base !important;
+
+        .v-list-item {
+          display: block !important;
+        }
+
+        .v-list-group__items {
+          .v-list-item {
+            padding-inline: $spacing-0 !important;
+            font-weight: $font-weight-light !important;
+          }
+        }
+
+        .v-list-item__append {
+          display: none !important;
+        }
+
+        .in-group-title {
+          .v-list-item-title {
+            font-size: $font-size-xs !important;
+          }
+        }
+      }
+
+      &--open {
+        // darken sureface on open
+        background-color: rgba(var(--v-theme-background), 0.4);
+        @include dark-theme {
+          background-color: rgba(var(--v-theme-background), 0.4);
+        }
+      }
+    }
+  }
 }
 
 // ============================================
-// 6. v-dialog Overrides
+// 5. v-dialog Overrides
 // ============================================
 
 .v-dialog {
@@ -101,7 +195,7 @@
 }
 
 // ============================================
-// 7. v-app-bar Overrides
+// 6. v-app-bar Overrides
 // ============================================
 
 .v-app-bar {
@@ -109,7 +203,7 @@
 }
 
 // ============================================
-// 8. v-chip Overrides
+// 7. v-chip Overrides
 // ============================================
 
 .v-chip {
@@ -121,31 +215,27 @@
 }
 
 // ============================================
-// 9. v-list Overrides
+// 8. v-list Overrides
 // ============================================
 
 .v-list {
   .v-list-item {
-    border-radius: $border-radius-base !important;
-    margin: $spacing-1 0 !important;
+    border-radius: $border-radius-base;
+    margin: $spacing-1 0;
     @include transition(background-color, transform, padding-right, padding-left);
 
     &--active {
-      background-color: rgba(var(--v-theme-primary), 0.12) !important;
+      color: rgba(var(--v-theme-primary), 1);
 
       &::before {
-        opacity: 0 !important;
+        opacity: 0;
       }
     }
-  }
-
-  .v-list-item-title {
-    font-weight: $font-weight-medium !important;
   }
 }
 
 // ============================================
-// 10. v-snackbar Overrides
+// 9. v-snackbar Overrides
 // ============================================
 
 .v-snackbar {
@@ -157,7 +247,7 @@
 }
 
 // ============================================
-// 11. v-tooltip Overrides
+// 10. v-tooltip Overrides
 // ============================================
 
 .v-tooltip {
@@ -175,7 +265,7 @@
 }
 
 // ============================================
-// 12. v-menu Overrides
+// 11. v-menu Overrides
 // ============================================
 
 .v-menu {
@@ -185,7 +275,7 @@
 }
 
 // ============================================
-// 13. v-tabs Overrides
+// 12. v-tabs Overrides
 // ============================================
 
 .v-tabs {
@@ -197,13 +287,13 @@
 }
 
 // ============================================
-// 14. v-expansion-panels Overrides
+// 13. v-expansion-panels Overrides
 // ============================================
 
 .v-expansion-panels {
   .v-expansion-panel {
     @include elevation-1;
-    margin-bottom: $spacing-2 !important;
+    margin-bottom: $spacing-2;
     border-radius: $border-radius-md !important;
 
     &--active {
@@ -217,7 +307,7 @@
 }
 
 // ============================================
-// 15. v-progress-linear Overrides
+// 14. v-progress-linear Overrides
 // ============================================
 
 .v-progress-linear {
@@ -225,7 +315,7 @@
 }
 
 // ============================================
-// 16. v-badge Overrides
+// 15. v-badge Overrides
 // ============================================
 
 .v-badge {
@@ -236,7 +326,7 @@
 }
 
 // ============================================
-// 17. v-alert Overrides
+// 16. v-alert Overrides
 // ============================================
 
 .v-alert {
@@ -249,11 +339,10 @@
 }
 
 // ============================================
-// 18. Custom Theme Variables
+// 17. Custom Theme Variables
 // ============================================
 
 :root {
-  // Custom CSS Variables
   --custom-sidebar-width: #{$sidebar-width};
   --custom-navbar-height: #{$navbar-height};
   --custom-spacing-base: #{$spacing-base};

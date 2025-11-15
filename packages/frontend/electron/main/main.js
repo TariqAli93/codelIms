@@ -134,6 +134,12 @@ app.whenReady().then(async () => {
     logger.error('Failed to start backend server:', error);
   }
 
+  // if isDev no need to check license
+  if (isDev) {
+    createWindow();
+    return;
+  }
+
   const licenseCheck = await licenseValidator.checkLicenseOnStartup();
 
   if (licenseCheck.needsActivation) {

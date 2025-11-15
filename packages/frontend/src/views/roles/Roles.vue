@@ -120,7 +120,7 @@
                     >
                       <v-expansion-panel-title>
                         <v-icon start color="primary">mdi-folder-shield</v-icon>
-                        {{ translateResource(resource) }}
+                        {{ resourceFromPermission(resource) }}
                       </v-expansion-panel-title>
                       <v-expansion-panel-text>
                         <div class="flex flex-wrap gap-2">
@@ -156,7 +156,7 @@
                     >
                       <v-expansion-panel-title>
                         <v-icon start color="primary">mdi-folder-shield</v-icon>
-                        {{ translateResource(resource) }}
+                        {{ resourceFromPermission(resource) }}
                       </v-expansion-panel-title>
                       <v-expansion-panel-text>
                         <v-list>
@@ -282,32 +282,47 @@ async function assign() {
 // 🔹 ترجمة وتهيئة الصلاحيات
 function translatePermission(name) {
   if (!name) return '';
-  const [res, act] = name.split(':');
-  const actions = {
+
+  const [action, resource] = name.split(':');
+
+  const actionsMap = {
     create: 'إنشاء',
     read: 'عرض',
     update: 'تعديل',
     delete: 'حذف',
     manage: 'إدارة',
   };
-  return `${actions[act] || act} ${translateResource(res)}`;
+
+  return `${actionsMap[action] || action} ${translateResource(resource)}`;
 }
 
 function translateResource(res) {
+  if (!res) return '';
+
+  console.log(res);
+
+  // توحيد الصيغة
+  const normalized = res
+    .toLowerCase()
+    .replace(/[-_]/g, '') // إزالة - و _
+    .replace(/s$/, ''); // إزالة s الأخيرة (users → user)
+
   const map = {
-    users: 'المستخدمين',
-    roles: 'الأدوار',
-    permissions: 'الصلاحيات',
-    customers: 'العملاء',
-    products: 'المنتجات',
-    sales: 'المبيعات',
-    categories: 'الفئات',
+    user: 'المستخدمين',
+    role: 'الأدوار',
+    permission: 'الصلاحيات',
+    customer: 'العملاء',
+    product: 'المنتجات',
+    sale: 'المبيعات',
+    category: 'الفئات',
   };
-  return map[res] || res;
+
+  return map[normalized] || res;
 }
 
 function getActionColor(name) {
-  const action = name.split(':')[1];
+  const [action] = name.split(':');
+
   return (
     {
       create: 'success',
@@ -316,6 +331,18 @@ function getActionColor(name) {
       delete: 'error',
       manage: 'secondary',
     }[action] || 'grey'
+  );
+}
+
+function resourceFromPermission(name) {
+  return (
+    {
+      manage: 'إدارة',
+      create: 'إنشاء',
+      read: 'عرض',
+      update: 'تعديل',
+      delete: 'حذف',
+    }[name] || name
   );
 }
 

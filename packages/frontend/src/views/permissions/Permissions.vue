@@ -27,7 +27,7 @@
     </v-card>
 
     <!-- 🔹 جدول الصلاحيات -->
-    <v-card elevation="6" rounded="lg">
+    <v-card>
       <v-data-table
         :headers="headers"
         :items="store.list"

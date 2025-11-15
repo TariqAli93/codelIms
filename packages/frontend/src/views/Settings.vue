@@ -1,34 +1,5 @@
 <template>
   <div>
-    <!-- Header -->
-    <!-- 🔹 شريط الأدوات العلوي -->
-    <v-card class="mb-4 d-flex justify-space-between align-center">
-      <div class="flex justify-space-between items-center pa-3">
-        <div class="text-h6 font-semibold text-primary">الاعدادات</div>
-      </div>
-
-      <v-tabs v-model="activeTab" align-tabs="start">
-        <v-tab value="company">
-          <v-icon start>mdi-domain</v-icon>
-          معلومات الشركة
-        </v-tab>
-        <v-tab value="currency">
-          <v-icon start>mdi-currency-usd</v-icon>
-          إعدادات العملة
-        </v-tab>
-
-        <v-tab value="license">
-          <v-icon start>mdi-key-variant</v-icon>
-          إدارة التفعيل
-        </v-tab>
-
-        <v-tab value="backup">
-          <v-icon start>mdi-database-backup</v-icon>
-          إدارة النسخ الاحتياطي
-        </v-tab>
-      </v-tabs>
-    </v-card>
-
     <!-- Error Alert -->
     <v-alert
       v-if="settingsStore.error"
@@ -40,30 +11,62 @@
     >
       {{ settingsStore.error }}
     </v-alert>
+    <!-- Header -->
 
-    <!-- Settings Tabs -->
-    <v-card class="mb-4"> </v-card>
+    <v-row>
+      <v-col cols="12" md="2">
+        <!-- 🔹 شريط الأدوات العلوي -->
+        <v-card class="flex flex-col">
+          <div class="flex justify-space-between items-center pa-3">
+            <div class="text-h6 font-semibold text-primary">الاعدادات</div>
+          </div>
 
-    <v-window v-model="activeTab">
-      <!-- Company Information Tab -->
-      <v-window-item value="company" class="pa-0">
-        <CompanyInfoForm :data="settingsStore.companyInfo" />
-      </v-window-item>
+          <v-tabs v-model="activeTab" class="pa-3" direction="vertical" spaced="both" hide-slider>
+            <v-tab value="company">
+              <v-icon start>mdi-domain</v-icon>
+              <span> معلومات الشركة</span>
+            </v-tab>
+            <v-tab value="currency">
+              <v-icon start>mdi-currency-usd</v-icon>
+              <span>إعدادات العملة</span>
+            </v-tab>
 
-      <!-- Currency Settings Tab -->
-      <v-window-item value="currency" class="pa-0">
-        <CurrencySettings />
-      </v-window-item>
+            <v-tab value="license">
+              <v-icon start>mdi-key-variant</v-icon>
+              <span>إدارة التفعيل</span>
+            </v-tab>
 
-      <!-- License Management Tab -->
-      <v-window-item value="license" class="pa-0">
-        <LicenseManager />
-      </v-window-item>
+            <v-tab value="backup">
+              <v-icon start>mdi-backup-restore</v-icon>
+              <span>إدارة النسخ الاحتياطي</span>
+            </v-tab>
+          </v-tabs>
+        </v-card>
+      </v-col>
 
-      <v-window-item value="backup" class="pa-0">
-        <BackupManager />
-      </v-window-item>
-    </v-window>
+      <v-col cols="12" md="10">
+        <v-window v-model="activeTab">
+          <!-- Company Information Tab -->
+          <v-window-item value="company" class="pa-0">
+            <CompanyInfoForm :data="settingsStore.companyInfo" />
+          </v-window-item>
+
+          <!-- Currency Settings Tab -->
+          <v-window-item value="currency" class="pa-0">
+            <CurrencySettings />
+          </v-window-item>
+
+          <!-- License Management Tab -->
+          <v-window-item value="license" class="pa-0">
+            <LicenseManager />
+          </v-window-item>
+
+          <v-window-item value="backup" class="pa-0">
+            <BackupManager />
+          </v-window-item>
+        </v-window>
+      </v-col>
+    </v-row>
 
     <!-- Success Snackbar -->
     <v-snackbar v-model="showSuccessMessage" color="success" timeout="3000" location="top">

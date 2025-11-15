@@ -80,6 +80,13 @@
       "buildResources": "build",
       "output": "../../release"
     },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "TariqAli93",
+        "repo": "codelIms"
+      }
+    ],
     "win": {
       "target": [
         "nsis"

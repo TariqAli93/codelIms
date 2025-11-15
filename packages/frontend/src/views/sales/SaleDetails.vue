@@ -100,7 +100,11 @@
               <p v-if="sale.paymentType === 'installment' && hasInstallments" class="mb-1">
                 <strong>قيمة القسط: </strong>
                 <span class="text-info">{{
-                  formatCurrency(sale.total / sale.installments.length, sale.currency)
+                  // sale total مقسوم على عدد الأقساط + الفائدة
+                  formatCurrency(
+                    (sale.total - sale.paidAmount) / sale.installments.length,
+                    sale.currency
+                  )
                 }}</span>
               </p>
               <!-- الإجمالي النهائي -->
@@ -400,6 +404,8 @@ import { useVueToPrint } from 'vue-to-print';
 const route = useRoute();
 const saleStore = useSaleStore();
 const notificationStore = useNotificationStore();
+
+// state
 const sale = ref(null);
 const loadingPayment = ref(false);
 const invoiceComponent = ref(null);
@@ -411,6 +417,7 @@ const paymentData = ref({
   notes: '',
 });
 
+// utils
 const toYmd = (date) => {
   const d = new Date(date);
   const year = d.getFullYear();
@@ -425,9 +432,9 @@ const paymentMethods = [
   { title: 'تحويل بنكي', value: 'bank_transfer' },
 ];
 
-const hasInstallments = computed(() => {
-  return sale.value?.installments && sale.value.installments.length > 0;
-});
+const hasInstallments = computed(
+  () => sale.value?.installments && sale.value.installments.length > 0
+);
 
 const formatCurrency = (amount, currency) =>
   new Intl.NumberFormat('ar', {
@@ -436,62 +443,80 @@ const formatCurrency = (amount, currency) =>
     maximumFractionDigits: (currency || 'IQD') === 'USD' ? 2 : 0,
   }).format(amount || 0);
 
+// status / labels for sale
 const getStatusColor = (status) => {
-  const colors = { completed: 'success', pending: 'warning', cancelled: 'error' };
+  const colors = {
+    completed: 'success',
+    pending: 'warning',
+    cancelled: 'error',
+  };
   return colors[status] || 'grey';
 };
 
 const getStatusText = (status) => {
-  const texts = { completed: 'مكتمل', pending: 'قيد الانتظار', cancelled: 'ملغي' };
+  const texts = {
+    completed: 'مكتمل',
+    pending: 'قيد الانتظار',
+    cancelled: 'ملغي',
+  };
   return texts[status] || status;
 };
 
 const getPaymentTypeText = (type) => {
-  const types = { cash: 'نقدي', installment: 'تقسيط', mixed: 'مختلط' };
+  const types = {
+    cash: 'نقدي',
+    installment: 'تقسيط',
+    mixed: 'مختلط',
+  };
   return types[type] || type;
 };
 
 const getPaymentMethodText = (method) => {
-  const methods = { cash: 'نقدي', card: 'بطاقة', bank_transfer: 'تحويل بنكي' };
+  const methods = {
+    cash: 'نقدي',
+    card: 'بطاقة',
+    bank_transfer: 'تحويل بنكي',
+  };
   return methods[method] || method;
 };
 
+// helpers for installments (to avoid duplicated code)
+const isInstallmentOverdue = (installment) => {
+  const dueDate = new Date(installment.dueDate);
+  const today = new Date();
+  return dueDate < today && installment.remainingAmount > 0;
+};
+
+// installments ui helpers
 const getInstallmentColor = (installment) => {
   if (installment.status === 'paid') return 'success';
   if (installment.status === 'cancelled') return 'error';
-  const dueDate = new Date(installment.dueDate);
-  const today = new Date();
-  if (dueDate < today && installment.remainingAmount > 0) return 'error';
+  if (isInstallmentOverdue(installment)) return 'error';
   return 'warning';
 };
 
 const getInstallmentStatusLabel = (installment) => {
   if (installment.status === 'paid') return 'مدفوع';
   if (installment.status === 'cancelled') return 'ملغي';
-  const dueDate = new Date(installment.dueDate);
-  const today = new Date();
-  if (dueDate < today && installment.remainingAmount > 0) return 'متأخر';
+  if (isInstallmentOverdue(installment)) return 'متأخر';
   return 'معلق';
 };
 
 const getInstallmentRowClass = (installment) => {
   if (installment.status === 'paid') return 'bg-success-lighten-5';
-  const dueDate = new Date(installment.dueDate);
-  const today = new Date();
-  if (dueDate < today && installment.remainingAmount > 0) return 'bg-error-lighten-5';
+  if (isInstallmentOverdue(installment)) return 'bg-error-lighten-5';
   return '';
 };
 
 const getInstallmentStatusColor = () => {
   if (!hasInstallments.value) return 'grey';
+
   const allPaid = sale.value.installments.every((inst) => inst.status === 'paid');
   if (allPaid) return 'success';
-  const hasOverdue = sale.value.installments.some((inst) => {
-    const dueDate = new Date(inst.dueDate);
-    const today = new Date();
-    return dueDate < today && inst.remainingAmount > 0;
-  });
+
+  const hasOverdue = sale.value.installments.some(isInstallmentOverdue);
   if (hasOverdue) return 'error';
+
   return 'warning';
 };
 
@@ -502,6 +527,7 @@ const getInstallmentStatusText = () => {
   return `${paid} من ${total} مدفوع`;
 };
 
+// actions
 const addPayment = async () => {
   try {
     loadingPayment.value = true;
@@ -518,10 +544,13 @@ const addPayment = async () => {
     }
 
     paymentData.value.currency = sale.value.currency;
+
     await saleStore.addPayment(paymentData.value);
     notificationStore.success('تم إضافة الدفعة بنجاح');
+
     const response = await saleStore.fetchSale(route.params.id);
     sale.value = response.data;
+
     paymentData.value = {
       amount: null,
       paymentMethod: 'cash',
@@ -567,10 +596,12 @@ const { handlePrint } = useVueToPrint({
   },
 });
 
+// lifecycle
 onMounted(async () => {
   try {
     const response = await saleStore.fetchSale(route.params.id);
     sale.value = response.data;
+
     if (sale.value) {
       paymentData.value.currency = sale.value.currency;
     }

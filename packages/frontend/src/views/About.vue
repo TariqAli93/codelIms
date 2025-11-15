@@ -79,19 +79,7 @@
                   <v-icon color="primary">mdi-office-building</v-icon>
                 </template>
                 <v-list-item-title class="font-weight-bold">اسم الشركة</v-list-item-title>
-                <v-list-item-subtitle class="mt-1">
-                  شركة كــــــــــودل للحلول البرمجية
-                </v-list-item-subtitle>
-              </v-list-item>
-
-              <v-divider class="my-2"></v-divider>
-
-              <v-list-item>
-                <template #prepend>
-                  <v-icon color="primary">mdi-account-tie</v-icon>
-                </template>
-                <v-list-item-title class="font-weight-bold">المدير التنفيذي</v-list-item-title>
-                <v-list-item-subtitle class="mt-1">طارق علي محمد</v-list-item-subtitle>
+                <v-list-item-subtitle class="mt-1"> كودل للحلول التقنية </v-list-item-subtitle>
               </v-list-item>
 
               <v-divider class="my-2"></v-divider>
@@ -154,12 +142,12 @@
                   <div class="text-subtitle-2 text-medium-emphasis mb-2">البريد الإلكتروني</div>
                   <div class="text-body-1 text-center font-weight-bold" dir="rtl">
                     <a
-                      href="mailto:tariqali9300@gmail.com"
+                      href="mailto:codelapp.iq@gmail.com"
                       class="text-center"
                       style="font-size: 0.85rem"
-                      @click.prevent="openExternal('mailto:tariqali9300@gmail.com')"
+                      @click.prevent="openExternal('mailto:codelapp.iq@gmail.com')"
                     >
-                      tariqali9300@gmail.com
+                      codelapp.iq@gmail.com
                     </a>
                   </div>
                 </v-card>
@@ -171,12 +159,12 @@
                   <div class="text-subtitle-2 text-medium-emphasis mb-2">فيسبوك</div>
                   <div class="text-body-1 font-weight-bold">
                     <a
-                      href="https://facebook.com/TariqAli9300"
+                      href="https://www.facebook.com/codel.apps/"
                       target="_blank"
                       class="text-decoration-none"
-                      @click.prevent="openExternal('https://facebook.com/TariqAli9300')"
+                      @click.prevent="openExternal('https://www.facebook.com/codel.apps/')"
                     >
-                      Tariq Ali
+                      Codel
                     </a>
                   </div>
                 </v-card>
@@ -192,9 +180,7 @@
           <v-card-text class="text-center pa-6">
             <v-icon size="60" color="primary" class="mb-4">mdi-shield-check</v-icon>
             <div class="text-h6 font-weight-bold mb-2">حقوق النشر والاستخدام</div>
-            <div class="text-body-1 text-medium-emphasis mb-3">
-              جميع الحقوق محفوظة © 2025 - شركة كــــــــــودل للحلول البرمجية
-            </div>
+            <div class="text-body-1 text-medium-emphasis mb-3">كودل للحلول التقنية</div>
             <div class="text-body-2 text-medium-emphasis">
               هذا البرنامج محمي بموجب قوانين حقوق الملكية الفكرية. يُمنع نسخ أو توزيع أو تعديل
               البرنامج دون الحصول على إذن كتابي من الشركة المطورة.
