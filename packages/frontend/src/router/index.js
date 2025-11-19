@@ -43,12 +43,12 @@ const routes = [
     component: MainLayout,
     meta: { requiresAuth: true },
     children: [
-      { path: '', name: 'Dashboard', component: Dashboard, meta: { permission: 'read:dashboard' } },
+      { path: '', name: 'Dashboard', component: Dashboard, meta: { permission: 'view:dashboard' } },
       {
         path: 'customers',
         name: 'Customers',
         component: Customers,
-        meta: { permission: 'read:customers' },
+        meta: { permission: 'view:customers' },
       },
       {
         path: 'customers/new',
@@ -66,7 +66,7 @@ const routes = [
         path: 'products',
         name: 'Products',
         component: Products,
-        meta: { permission: 'read:products' },
+        meta: { permission: 'view:products' },
       },
       {
         path: 'products/new',
@@ -84,9 +84,9 @@ const routes = [
         path: 'categories',
         name: 'Categories',
         component: Categories,
-        meta: { permission: 'read:categories' },
+        meta: { permission: 'view:categories' },
       },
-      { path: 'sales', name: 'Sales', component: Sales, meta: { permission: 'read:sales' } },
+      { path: 'sales', name: 'Sales', component: Sales, meta: { permission: 'view:sales' } },
       {
         path: 'sales/new',
         name: 'NewSale',
@@ -97,21 +97,21 @@ const routes = [
         path: 'sales/:id',
         name: 'SaleDetails',
         component: SaleDetails,
-        meta: { permission: 'read:sales' },
+        meta: { permission: 'view:sales' },
       },
       {
         path: 'reports',
         name: 'Reports',
         component: Reports,
-        meta: { permission: 'read:reports' },
+        meta: { permission: 'view:reports' },
       },
-      { path: 'users', name: 'Users', component: Users, meta: { permission: 'read:users' } },
-      { path: 'roles', name: 'Roles', component: Roles, meta: { permission: 'read:roles' } },
+      { path: 'users', name: 'Users', component: Users, meta: { permission: 'view:users' } },
+      { path: 'roles', name: 'Roles', component: Roles, meta: { permission: 'view:roles' } },
       {
         path: 'permissions',
         name: 'Permissions',
         component: Permissions,
-        meta: { permission: 'read:permissions' },
+        meta: { permission: 'view:permissions' },
       },
       { path: 'profile', name: 'Profile', component: Profile }, // 👈 صفحة الملف الشخصي
       { path: 'settings', name: 'Settings', component: Settings },
@@ -132,7 +132,7 @@ router.beforeEach(async (to, from, next) => {
   // ✅ تحقق من تحميل المستخدم والصلاحيات بعد تسجيل الدخول
   if (authStore.isAuthenticated && !authStore.user?.permissions.length) {
     try {
-      await authStore.fetchMe?.();
+      await authStore.getProfile();
     } catch (e) {
       console.warn('⚠️ Failed to fetch user permissions:', e);
     }

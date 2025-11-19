@@ -96,8 +96,18 @@ onMounted(async () => {
   if (isEdit.value) {
     loading.value = true;
     try {
-      await customerStore.fetchCustomer(route.params.id);
-      formData.value = { ...customerStore.currentCustomer };
+      const customersList = await customerStore.fetchCustomers();
+      const currentCustomer = customersList.data.find((c) => {
+        console.log('Comparing', c.id, route.params.id);
+        return c.id === parseInt(route.params.id);
+      });
+      formData.value = {
+        name: currentCustomer?.name,
+        phone: currentCustomer?.phone,
+        city: currentCustomer?.city,
+        address: currentCustomer?.address,
+        notes: currentCustomer?.notes,
+      };
     } catch (error) {
       console.error('Error fetching customer:', error);
     } finally {

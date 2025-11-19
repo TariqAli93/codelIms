@@ -116,34 +116,6 @@ export const useSettingsStore = defineStore('settings', () => {
     }
   };
 
-  const uploadLogo = async (file) => {
-    isLoading.value = true;
-    error.value = null;
-
-    try {
-      const formData = new FormData();
-      formData.append('logo', file);
-
-      const response = await api.post('/settings/logo', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-
-      if (response.data.success) {
-        companyInfo.value.logoUrl = response.data.logoUrl;
-        return response.data;
-      } else {
-        throw new Error(response.data.message || 'Failed to upload logo');
-      }
-    } catch (err) {
-      error.value = err.response?.data?.message || err.message;
-      throw err;
-    } finally {
-      isLoading.value = false;
-    }
-  };
-
   const validatePhone = async (phone) => {
     try {
       const response = await api.post('/settings/validate/phone', { phone });
@@ -336,7 +308,6 @@ export const useSettingsStore = defineStore('settings', () => {
     fetchAllSettings,
     fetchCompanyInfo,
     saveCompanyInfo,
-    uploadLogo,
     validatePhone,
     setSetting,
     bulkUpdateSettings,

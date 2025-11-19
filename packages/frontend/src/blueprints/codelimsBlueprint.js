@@ -1,6 +1,6 @@
-// src/blueprints/codelimsBlueprint.js
+// src/blueprints/nuqtaplusBlueprint.js
 export default {
-  name: 'Codelims Modern Blueprint',
+  name: 'nuqtaplus Modern Blueprint',
 
   theme: {
     defaultTheme: 'dark',

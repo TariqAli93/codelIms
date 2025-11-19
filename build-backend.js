@@ -127,7 +127,7 @@ import('./src/server.js')
 
     // Create installation instructions
     console.log('📚 Creating README...');
-    const readme = `# CodeLIMS Backend - Production Build
+    const readme = `# nuqtaplus Backend - Production Build
 
 ## Installation
 

@@ -11,8 +11,8 @@ export const users = sqliteTable('users', {
   roleId: integer('role_id').references(() => roles.id),
   isActive: integer('is_active', { mode: 'boolean' }).default(true),
   lastLoginAt: text('last_login_at'),
-  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
+  createdAt: text('created_at').default(sql`(datetime('now','localtime'))`),
+  updatedAt: text('updated_at').default(sql`(datetime('now','localtime'))`),
 });
 
 // Roles Table
@@ -20,8 +20,8 @@ export const roles = sqliteTable('roles', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   name: text('name').notNull().unique(),
   description: text('description'),
-  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
+  createdAt: text('created_at').default(sql`(datetime('now','localtime'))`),
+  updatedAt: text('updated_at').default(sql`(datetime('now','localtime'))`),
   createdBy: integer('created_by').references(() => users.id),
 });
 
@@ -32,8 +32,8 @@ export const permissions = sqliteTable('permissions', {
   resource: text('resource').notNull(),
   action: text('action').notNull(),
   description: text('description'),
-  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
+  createdAt: text('created_at').default(sql`(datetime('now','localtime'))`),
+  updatedAt: text('updated_at').default(sql`(datetime('now','localtime'))`),
   createdBy: integer('created_by').references(() => users.id),
 });
 
@@ -45,8 +45,8 @@ export const rolePermissions = sqliteTable('role_permissions', {
   permissionId: integer('permission_id')
     .notNull()
     .references(() => permissions.id, { onDelete: 'cascade' }),
-  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
+  createdAt: text('created_at').default(sql`(datetime('now','localtime'))`),
+  updatedAt: text('updated_at').default(sql`(datetime('now','localtime'))`),
   createdBy: integer('created_by').references(() => users.id),
 });
 
@@ -61,8 +61,8 @@ export const customers = sqliteTable('customers', {
   totalPurchases: real('total_purchases').default(0),
   totalDebt: real('total_debt').default(0),
   isActive: integer('is_active', { mode: 'boolean' }).default(true),
-  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
+  createdAt: text('created_at').default(sql`(datetime('now','localtime'))`),
+  updatedAt: text('updated_at').default(sql`(datetime('now','localtime'))`),
   createdBy: integer('created_by').references(() => users.id),
 });
 
@@ -72,8 +72,8 @@ export const categories = sqliteTable('categories', {
   name: text('name').notNull().unique(),
   description: text('description'),
   isActive: integer('is_active', { mode: 'boolean' }).default(true),
-  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
+  createdAt: text('created_at').default(sql`(datetime('now','localtime'))`),
+  updatedAt: text('updated_at').default(sql`(datetime('now','localtime'))`),
   createdBy: integer('created_by').references(() => users.id),
 });
 
@@ -94,8 +94,8 @@ export const products = sqliteTable('products', {
   supplier: text('supplier'),
   status: text('status').notNull().default('available'), // available, out_of_stock, discontinued
   isActive: integer('is_active', { mode: 'boolean' }).default(true),
-  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
+  createdAt: text('created_at').default(sql`(datetime('now','localtime'))`),
+  updatedAt: text('updated_at').default(sql`(datetime('now','localtime'))`),
   createdBy: integer('created_by').references(() => users.id),
 });
 
@@ -117,8 +117,8 @@ export const sales = sqliteTable('sales', {
   remainingAmount: real('remaining_amount').default(0),
   status: text('status').notNull().default('pending'), // 'pending', 'completed', 'cancelled'
   notes: text('notes'),
-  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
+  createdAt: text('created_at').default(sql`(datetime('now','localtime'))`),
+  updatedAt: text('updated_at').default(sql`(datetime('now','localtime'))`),
   createdBy: integer('created_by').references(() => users.id),
 });
 
@@ -134,7 +134,7 @@ export const saleItems = sqliteTable('sale_items', {
   unitPrice: real('unit_price').notNull(),
   discount: real('discount').default(0),
   subtotal: real('subtotal').notNull(),
-  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+  createdAt: text('created_at').default(sql`(datetime('now','localtime'))`),
 });
 
 // Payments Table
@@ -146,9 +146,9 @@ export const payments = sqliteTable('payments', {
   currency: text('currency').notNull().default('USD'),
   exchangeRate: real('exchange_rate').default(1),
   paymentMethod: text('payment_method').notNull(), // 'cash', 'card', 'bank_transfer'
-  paymentDate: text('payment_date').default(sql`CURRENT_TIMESTAMP`),
+  paymentDate: text('payment_date').default(sql`(datetime('now','localtime'))`),
   notes: text('notes'),
-  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+  createdAt: text('created_at').default(sql`(datetime('now','localtime'))`),
   createdBy: integer('created_by').references(() => users.id),
 });
 
@@ -166,8 +166,8 @@ export const installments = sqliteTable('installments', {
   paidDate: text('paid_date'),
   status: text('status').notNull().default('pending'), // 'pending', 'paid', 'overdue', 'cancelled'
   notes: text('notes'),
-  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
+  createdAt: text('created_at').default(sql`(datetime('now','localtime'))`),
+  updatedAt: text('updated_at').default(sql`(datetime('now','localtime'))`),
   createdBy: integer('created_by').references(() => users.id),
 });
 
@@ -180,7 +180,7 @@ export const currencySettings = sqliteTable('currency_settings', {
   exchangeRate: real('exchange_rate').notNull(),
   isBaseCurrency: integer('is_base_currency', { mode: 'boolean' }).default(false),
   isActive: integer('is_active', { mode: 'boolean' }).default(true),
-  updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text('updated_at').default(sql`(datetime('now','localtime'))`),
 });
 
 // Inventory Transactions Table
@@ -192,7 +192,7 @@ export const inventoryTransactions = sqliteTable('inventory_transactions', {
   reference: text('reference'), // invoice number, order number, etc.
   notes: text('notes'),
   createdBy: integer('created_by').references(() => users.id),
-  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+  createdAt: text('created_at').default(sql`(datetime('now','localtime'))`),
 });
 
 // Activity Logs Table
@@ -204,7 +204,7 @@ export const activityLogs = sqliteTable('activity_logs', {
   resourceId: integer('resource_id'),
   details: text('details'),
   ipAddress: text('ip_address'),
-  createdAt: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+  createdAt: text('created_at').default(sql`(datetime('now','localtime'))`),
 });
 
 // Settings Table
@@ -213,7 +213,7 @@ export const settings = sqliteTable('settings', {
   key: text('key').notNull().unique(),
   value: text('value').notNull(),
   description: text('description'),
-  updatedAt: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: text('updated_at').default(sql`(datetime('now','localtime'))`),
   updatedBy: integer('updated_by').references(() => users.id),
 });
 
@@ -222,7 +222,7 @@ export const licenses = sqliteTable('licenses', {
   licenseKey: text('license_key').notNull().unique(),
   issuedTo: text('issued_to'),
   isActive: integer('is_active', { mode: 'boolean' }).default(false),
-  issuedAt: text('issued_at').default(sql`CURRENT_TIMESTAMP`),
+  issuedAt: text('issued_at').default(sql`(datetime('now','localtime'))`),
   expiresAt: text('expires_at').notNull(),
   createdBy: integer('created_by').references(() => users.id),
 });

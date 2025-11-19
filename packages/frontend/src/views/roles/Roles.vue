@@ -287,10 +287,11 @@ function translatePermission(name) {
 
   const actionsMap = {
     create: 'إنشاء',
-    read: 'عرض',
+    read: 'قراءة',
     update: 'تعديل',
     delete: 'حذف',
     manage: 'إدارة',
+    view: 'عرض',
   };
 
   return `${actionsMap[action] || action} ${translateResource(resource)}`;
@@ -302,19 +303,20 @@ function translateResource(res) {
   console.log(res);
 
   // توحيد الصيغة
-  const normalized = res
-    .toLowerCase()
-    .replace(/[-_]/g, '') // إزالة - و _
-    .replace(/s$/, ''); // إزالة s الأخيرة (users → user)
+  const normalized = res.toLowerCase().replace(/[-_]/g, ''); // إزالة - و _
 
   const map = {
-    user: 'المستخدمين',
-    role: 'الأدوار',
-    permission: 'الصلاحيات',
-    customer: 'العملاء',
-    product: 'المنتجات',
-    sale: 'المبيعات',
-    category: 'الفئات',
+    users: 'المستخدمين',
+    roles: 'الأدوار',
+    permissions: 'الصلاحيات',
+    customers: 'العملاء',
+    products: 'المنتجات',
+    sales: 'المبيعات',
+    categories: 'الفئات',
+    settings: 'الإعدادات',
+    reports: 'التقارير',
+    dashboard: 'لوحة التحكم',
+    view: 'عرض',
   };
 
   return map[normalized] || res;
@@ -339,9 +341,10 @@ function resourceFromPermission(name) {
     {
       manage: 'إدارة',
       create: 'إنشاء',
-      read: 'عرض',
+      read: 'قراءة',
       update: 'تعديل',
       delete: 'حذف',
+      view: 'عرض',
     }[name] || name
   );
 }

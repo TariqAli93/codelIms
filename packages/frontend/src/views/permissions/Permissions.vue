@@ -135,19 +135,16 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-
-    <!-- ✅ إشعار المستخدم -->
-    <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="2500">
-      {{ snackbar.text }}
-    </v-snackbar>
   </div>
 </template>
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue';
 import { usePermissionsStore } from '@/stores/permissions';
+import { useNotificationStore } from '@/stores/notification';
 
 const store = usePermissionsStore();
+const notification = useNotificationStore();
 const showForm = ref(false);
 const formRef = ref(null);
 const search = ref('');
@@ -169,6 +166,9 @@ function translatePermission(name) {
     products: 'المنتجات',
     sales: 'المبيعات',
     categories: 'الفئات',
+    settings: 'الإعدادات',
+    reports: 'التقارير',
+    dashboard: 'لوحة التحكم',
   };
 
   // ترجمة الأفعال (actions)
@@ -226,6 +226,9 @@ const translateResource = (r) =>
     products: 'المنتجات',
     sales: 'المبيعات',
     categories: 'الفئات',
+    settings: 'الإعدادات',
+    reports: 'التقارير',
+    dashboard: 'لوحة التحكم',
   })[r] || r;
 
 const translateAction = (a) =>
@@ -283,9 +286,7 @@ async function save() {
 async function remove(item) {
   if (!confirm(`هل أنت متأكد من حذف ${item.name}؟`)) return;
   await store.remove(item.id);
-  snackbar.text = 'تم الحذف بنجاح';
-  snackbar.color = 'success';
-  snackbar.show = true;
+  notification.success('تم الحذف بنجاح');
   await store.fetch(search.value);
 }
 

@@ -1,7 +1,7 @@
 {
-  "name": "@codelims/backend",
-  "version": "1.0.0",
-  "description": "CodeLIMS Backend - Fastify API Server",
+  "name": "@nuqtaplus/backend",
+  "version": "1.0.3",
+  "description": "نقطة بلس - نظام إدارة نقاط البيع والمخازن",
   "type": "module",
   "main": "src/server.js",
   "scripts": {

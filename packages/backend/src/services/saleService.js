@@ -144,7 +144,7 @@ export class SaleService {
         exchangeRate,
         paymentMethod: saleData.paymentMethod || 'cash',
         createdBy: userId,
-        notes: 'Initial payment',
+        notes: saleData.paymentNotes || 'دفع نقدي عند البيع',
       });
     }
 

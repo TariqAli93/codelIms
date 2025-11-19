@@ -2,18 +2,20 @@
   <v-app>
     <v-navigation-drawer app v-model="drawer" permanent width="250" rail rail-width="120">
       <!-- add logo here -->
-      <div class="d-flex justify-center align-center pa-4 mb-4">
-        <v-img
-          src="../assets/icon.png"
-          :src-dark="'https://cdn.vuetifyjs.com/docs/images/logos/vuetify-logo-v3-slim-text-dark.svg'"
-          alt="CodeLIMS Logo"
-          max-width="180"
-          height="40"
-          contain
+      <router-link
+        to="/"
+        class="flex justify-center align-center pa-1 fixed top-0 left-0 right-0 border-b z-50"
+        style="background-color: rgba(var(--v-theme-background), 1)"
+      >
+        <img
+          src="@/assets/icon.png"
+          :src-dark="'@/assets/logo.png'"
+          alt="Nuqta Plus Logo"
+          id="navigationDrawerLogo"
         />
-      </div>
+      </router-link>
 
-      <v-list :lines="false" density="comfortable" nav>
+      <v-list :lines="false" density="comfortable" nav style="margin-top: 65px">
         <!-- العناصر الرئيسية -->
         <template v-for="item in filteredMenu" :key="item.title">
           <!-- إذا ماكو مجموعة -->
@@ -77,54 +79,57 @@
       </v-list>
     </v-navigation-drawer>
 
-    <v-app-bar app elevation="0" dark color="background">
-      <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
+    <v-app-bar app elevation="0" dark class="border-b" color="background">
+      <v-container class="px-10 flex align-center">
+        <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
+        <v-toolbar-title>{{ currentPageTitle }}</v-toolbar-title>
 
-      <v-toolbar-title>{{ currentPageTitle }}</v-toolbar-title>
+        <v-spacer></v-spacer>
 
-      <v-spacer></v-spacer>
+        <v-btn icon @click="toggleTheme">
+          <v-icon>{{ isDark ? 'mdi-white-balance-sunny' : 'mdi-weather-night' }}</v-icon>
+        </v-btn>
 
-      <v-btn icon @click="toggleTheme">
-        <v-icon>{{ isDark ? 'mdi-white-balance-sunny' : 'mdi-weather-night' }}</v-icon>
-      </v-btn>
-
-      <v-menu>
-        <template #activator="{ props }">
-          <v-btn icon v-bind="props">
-            <v-icon>mdi-account-circle</v-icon>
-          </v-btn>
-        </template>
-        <v-list>
-          <v-list-item>
-            <v-list-item-title>{{ authStore.user?.username }}</v-list-item-title>
-            <v-list-item-subtitle>{{ authStore.user?.role?.name }}</v-list-item-subtitle>
-          </v-list-item>
-          <v-divider></v-divider>
-          <v-list-item prepend-icon="mdi-account-circle" to="/profile">
-            <v-list-item-title>الملف الشخصي</v-list-item-title>
-          </v-list-item>
-          <v-list-item prepend-icon="mdi-logout" @click="handleLogout">
-            <v-list-item-title>تسجيل خروج</v-list-item-title>
-          </v-list-item>
-        </v-list>
-      </v-menu>
+        <v-menu>
+          <template #activator="{ props }">
+            <v-btn icon v-bind="props">
+              <v-icon>mdi-account-circle</v-icon>
+            </v-btn>
+          </template>
+          <v-list>
+            <v-list-item>
+              <v-list-item-title>{{ authStore.user?.username }}</v-list-item-title>
+              <v-list-item-subtitle>{{ authStore.user?.role?.name }}</v-list-item-subtitle>
+            </v-list-item>
+            <v-divider></v-divider>
+            <v-list-item prepend-icon="mdi-account-circle" to="/profile">
+              <v-list-item-title>الملف الشخصي</v-list-item-title>
+            </v-list-item>
+            <v-list-item prepend-icon="mdi-logout" @click="handleLogout">
+              <v-list-item-title>تسجيل خروج</v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-menu>
+      </v-container>
     </v-app-bar>
 
     <v-main>
-      <v-container>
+      <v-container class="px-10">
         <router-view />
       </v-container>
     </v-main>
 
     <!-- Footer -->
     <v-footer color="background" app>
-      <v-row align="center" no-gutters>
-        <v-col cols="12" md="12" class="flex justify-between items-center">
-          <div class="text-body-2"><strong>CodeLIMS</strong> - نظام إدارة المبيعات</div>
+      <v-container class="px-10">
+        <v-row align="center" no-gutters>
+          <v-col cols="12" md="12" class="flex justify-between items-center">
+            <div class="text-body-2"><strong>نقطة بلس</strong> - نظام إدارة المبيعات</div>
 
-          <div class="text-body-2">كودل للحلول التقنية</div>
-        </v-col>
-      </v-row>
+            <div class="text-body-2">كودل للحلول التقنية</div>
+          </v-col>
+        </v-row>
+      </v-container>
     </v-footer>
   </v-app>
 </template>
@@ -160,11 +165,11 @@ applyColorScheme(savedTheme);
 const menuItems = [
   { title: 'الرئيسية', icon: 'mdi-view-dashboard', to: '/', permission: null },
 
-  { title: 'المبيعات', icon: 'mdi-cash-register', to: '/sales', permission: 'read:sales' },
-  { title: 'العملاء', icon: 'mdi-account-group', to: '/customers', permission: 'read:customers' },
-  { title: 'المنتجات', icon: 'mdi-package-variant', to: '/products', permission: 'read:products' },
-  { title: 'التصنيفات', icon: 'mdi-shape', to: '/categories', permission: 'read:categories' },
-  { title: 'التقارير', icon: 'mdi-chart-box', to: '/reports', permission: 'read:reports' },
+  { title: 'المبيعات', icon: 'mdi-cash-register', to: '/sales', permission: 'view:sales' },
+  { title: 'العملاء', icon: 'mdi-account-group', to: '/customers', permission: 'view:customers' },
+  { title: 'المنتجات', icon: 'mdi-package-variant', to: '/products', permission: 'view:products' },
+  { title: 'التصنيفات', icon: 'mdi-shape', to: '/categories', permission: 'view:categories' },
+  { title: 'التقارير', icon: 'mdi-chart-box', to: '/reports', permission: 'view:reports' },
 
   {
     title: 'الادارة',
@@ -173,15 +178,15 @@ const menuItems = [
     permission: null,
     group: {
       items: [
-        { title: 'المستخدمون', icon: 'mdi-account', to: '/users', permission: 'read:users' },
-        { title: 'الأدوار', icon: 'mdi-shield-account', to: '/roles', permission: 'read:roles' },
+        { title: 'المستخدمون', icon: 'mdi-account', to: '/users', permission: 'view:users' },
+        { title: 'الأدوار', icon: 'mdi-shield-account', to: '/roles', permission: 'view:roles' },
         {
           title: 'الصلاحيات',
           icon: 'mdi-shield-key',
           to: '/permissions',
-          permission: 'read:permissions',
+          permission: 'view:permissions',
         },
-        { title: 'الاعدادات', icon: 'mdi-cog', to: '/settings', permission: 'read:settings' },
+        { title: 'الاعدادات', icon: 'mdi-cog', to: '/settings', permission: 'view:settings' },
       ],
     },
   },
@@ -228,7 +233,7 @@ const currentPageTitle = computed(() => {
       }
     }
   }
-  return item?.title || 'CodeLIMS';
+  return item?.title || 'نقطة بلس';
 });
 
 const toggleTheme = () => {
@@ -243,3 +248,11 @@ const handleLogout = () => {
   router.push({ name: 'Login' });
 };
 </script>
+
+<style scoped lang="scss">
+#navigationDrawerLogo {
+  max-width: 100px;
+  height: 56px;
+  object-fit: contain;
+}
+</style>

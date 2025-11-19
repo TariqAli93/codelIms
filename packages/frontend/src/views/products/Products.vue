@@ -3,7 +3,14 @@
     <v-card class="mb-4">
       <div class="flex justify-space-between items-center pa-3">
         <div class="text-h6 font-semibold text-primary">إدارة المنتجات</div>
-        <v-btn color="primary" prepend-icon="mdi-plus" to="/products/new"> منتج جديد </v-btn>
+        <v-btn
+          v-can.hide="['create:products']"
+          color="primary"
+          prepend-icon="mdi-plus"
+          to="/products/new"
+        >
+          منتج جديد
+        </v-btn>
       </div>
     </v-card>
 
@@ -68,6 +75,7 @@
               size="small"
               variant="text"
               color="error"
+              v-can="['delete:products']"
               @click="confirmDelete(item)"
             ></v-btn>
           </template>

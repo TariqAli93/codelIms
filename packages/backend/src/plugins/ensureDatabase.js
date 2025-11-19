@@ -29,7 +29,7 @@ export function resolveFromEnv(envValue) {
 }
 
 async function ensureDatabasePlugin(fastify, opts) {
-  const { defaultFile = path.resolve(process.cwd(), 'data', 'codelims.db') } = opts || {};
+  const { defaultFile = path.resolve(process.cwd(), 'data', 'nuqtaplus.db') } = opts || {};
   const envSource = process.env.DATABASE_URL || process.env.DB_FILE || process.env.SQLITE_FILE;
   const resolved = resolveFromEnv(envSource) || defaultFile;
 

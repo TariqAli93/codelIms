@@ -10,13 +10,13 @@ import { md3 } from 'vuetify/blueprints';
 const lightTheme = {
   dark: false,
   colors: {
-    primary: '#1976D2',
-    secondary: '#424242',
-    accent: '#82B1FF',
-    error: '#FF5252',
-    info: '#2196F3',
-    success: '#4CAF50',
-    warning: '#FFC107',
+    primary: '#7B5CFF', // Violet Blue modern
+    secondary: '#3A3A3D', // Soft graphite
+    accent: '#9D8CFF', // Light violet accent
+    error: '#FF5C5C', // Soft red (less aggressive)
+    info: '#4DA3FF', // Calm info blue
+    success: '#4ED48A', // Fresh green
+    warning: '#FFC85C', // Amber gold
     background: '#F5F5F5',
     surface: '#FFFFFF',
   },

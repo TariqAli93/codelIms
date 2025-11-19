@@ -7,7 +7,7 @@
         <p class="mb-1">
           رقم الفاتورة: <strong>{{ props.sale.invoiceNumber }}</strong>
         </p>
-        <p class="mb-2">التاريخ: {{ toYmd(props.sale.createdAt) }}</p>
+        <p class="mb-2">التاريخ: {{ toYmdWithTime(props.sale.createdAt) }}</p>
 
         <span
           class="status-chip"
@@ -112,8 +112,8 @@
             <td :class="inst.remainingAmount > 0 ? 'error' : 'success'">
               {{ formatCurrency(inst.remainingAmount) }}
             </td>
-            <td>{{ toYmd(inst.dueDate) }}</td>
-            <td>{{ inst.paidDate ? toYmd(inst.paidDate) : '-' }}</td>
+            <td>{{ toYmdWithTime(inst.dueDate) }}</td>
+            <td>{{ inst.paidDate ? toYmdWithTime(inst.paidDate) : '-' }}</td>
             <td>{{ getInstallmentStatusLabel(inst) }}</td>
           </tr>
         </tbody>
@@ -139,7 +139,7 @@
             <td>{{ i + 1 }}</td>
             <td class="success">{{ formatCurrency(p.amount) }}</td>
             <td>{{ getPaymentMethodText(p.paymentMethod) }}</td>
-            <td>{{ toYmd(p.createdAt) }}</td>
+            <td>{{ toYmdWithTime(p.createdAt) }}</td>
             <td>{{ p.createdBy || 'غير معروف' }}</td>
             <td>{{ p.notes || '-' }}</td>
           </tr>
@@ -191,6 +191,12 @@ const formatCurrency = (val) => {
 };
 
 const toYmd = (d) => new Date(d).toISOString().split('T')[0];
+
+// toYmd with time
+const toYmdWithTime = (d) => {
+  const date = new Date(d);
+  return date.toISOString().split('T')[0] + ' ' + date.toTimeString().split(' ')[0];
+};
 
 const getStatusText = (s) =>
   ({

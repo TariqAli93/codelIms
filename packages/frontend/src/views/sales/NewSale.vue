@@ -37,6 +37,7 @@
             prepend-inner-icon="mdi-barcode-scan"
             clearable
             @keyup.enter="handleBarcodeScan"
+            autofocus
             class="mb-4"
           />
 

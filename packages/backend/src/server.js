@@ -36,7 +36,7 @@ const fastify = Fastify({
 });
 
 // Enable console.log to work alongside Pino logger
-console.log('\n🚀 CodeLIMS Backend Server Starting...');
+console.log('\n🚀 nuqtaplus Backend Server Starting...');
 console.log('📊 Console.log statements are now visible');
 console.log('⚙️  Configuration loaded');
 console.log(`🔧 Environment: ${config.server.env}`);
@@ -56,7 +56,7 @@ const start = async () => {
     fastify.get('/', async () => {
       return {
         status: 'ok',
-        service: 'CodeLIMS Backend API',
+        service: 'nuqtaplus Backend API',
         version: '1.0.0',
         timestamp: new Date().toISOString(),
       };

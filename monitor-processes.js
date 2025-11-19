@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Process Monitor for CodeLIMS Application
+ * Process Monitor for nuqtaplus Application
  * This script helps monitor multiple processes and prevent running duplicate instances
  */
 
@@ -97,7 +97,7 @@ if (args.includes('--check') || args.includes('-c')) {
   killElectronProcesses();
 } else if (args.includes('--help') || args.includes('-h')) {
   console.log(`
-📋 CodeLIMS Process Monitor
+📋 nuqtaplus Process Monitor
 
 Usage:
   node monitor-processes.js [options]
@@ -112,7 +112,7 @@ Examples:
   node monitor-processes.js --kill
   `);
 } else {
-  console.log('📋 CodeLIMS Process Monitor');
+  console.log('📋 nuqtaplus Process Monitor');
   console.log('Use --help to display available options');
   checkElectronProcesses();
 }

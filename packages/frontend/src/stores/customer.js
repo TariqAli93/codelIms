@@ -97,5 +97,13 @@ export const useCustomerStore = defineStore('customer', {
         this.loading = false;
       }
     },
+
+    getCustomerById(id) {
+      if (!this.customers.length) {
+        return null;
+      }
+
+      return this.customers.find((customer) => customer.id === id);
+    },
   },
 });

@@ -44,7 +44,7 @@ export default async function settingsRoutes(fastify) {
         },
       },
     },
-    preHandler: [fastify.authenticate],
+    preHandler: [fastify.authorize('settings:read')],
     handler: settingsController.list,
   });
 
@@ -63,7 +63,7 @@ export default async function settingsRoutes(fastify) {
         },
       },
     },
-    preHandler: [fastify.authenticate],
+    preHandler: [fastify.authorize('settings:read')],
     handler: settingsController.getAll,
   });
 
@@ -99,7 +99,7 @@ export default async function settingsRoutes(fastify) {
         },
       },
     },
-    preHandler: [fastify.authenticate],
+    preHandler: [fastify.authorize('settings:read')],
     handler: settingsController.getByKey,
   });
 
@@ -146,7 +146,7 @@ export default async function settingsRoutes(fastify) {
         },
       },
     },
-    preHandler: [fastify.authenticate],
+    preHandler: [fastify.authorize('settings:create')],
     handler: settingsController.create,
   });
 
@@ -193,7 +193,7 @@ export default async function settingsRoutes(fastify) {
         },
       },
     },
-    preHandler: [fastify.authenticate],
+    preHandler: [fastify.authorize('settings:update')],
     handler: settingsController.update,
   });
 
@@ -219,7 +219,7 @@ export default async function settingsRoutes(fastify) {
         },
       },
     },
-    preHandler: [fastify.authenticate],
+    preHandler: [fastify.authorize('settings:delete')],
     handler: settingsController.delete,
   });
 
@@ -258,7 +258,7 @@ export default async function settingsRoutes(fastify) {
         },
       },
     },
-    preHandler: [fastify.authenticate],
+    preHandler: [fastify.authorize('settings:update')],
     handler: settingsController.bulkUpdate,
   });
 
@@ -294,7 +294,7 @@ export default async function settingsRoutes(fastify) {
         },
       },
     },
-    preHandler: [fastify.authenticate],
+    preHandler: [fastify.authorize('settings:read')],
     handler: settingsController.getCompanyInfo,
   });
 
@@ -359,7 +359,7 @@ export default async function settingsRoutes(fastify) {
         },
       },
     },
-    preHandler: [fastify.authenticate],
+    preHandler: [fastify.authorize('settings:update')],
     handler: settingsController.saveCompanyInfo,
   });
 
@@ -385,7 +385,7 @@ export default async function settingsRoutes(fastify) {
         },
       },
     },
-    preHandler: [fastify.authenticate],
+    preHandler: [fastify.authorize('settings:update')],
     handler: settingsController.uploadLogo,
   });
 
@@ -420,7 +420,7 @@ export default async function settingsRoutes(fastify) {
         },
       },
     },
-    preHandler: [fastify.authenticate],
+    preHandler: [fastify.authorize('settings:read')],
     handler: settingsController.validatePhone,
   });
 
@@ -446,7 +446,7 @@ export default async function settingsRoutes(fastify) {
         },
       },
     },
-    preHandler: [fastify.authenticate],
+    preHandler: [fastify.authorize('settings:read')],
     handler: settingsController.getCurrencySettings,
   });
 
@@ -495,7 +495,7 @@ export default async function settingsRoutes(fastify) {
         },
       },
     },
-    preHandler: [fastify.authenticate],
+    preHandler: [fastify.authorize('settings:update')],
     handler: settingsController.saveCurrencySettings,
   });
 
@@ -511,7 +511,7 @@ export default async function settingsRoutes(fastify) {
         properties: {
           confirmationToken: {
             type: 'string',
-            enum: ['RESET_CODELIMS_APPLICATION'],
+            enum: ['RESET_nuqtaplus_APPLICATION'],
             description: 'Required confirmation token',
           },
         },
@@ -534,7 +534,7 @@ export default async function settingsRoutes(fastify) {
         },
       },
     },
-    preHandler: [fastify.authenticate],
+    preHandler: [fastify.authorize('settings:manage')],
     handler: settingsController.resetApplication,
   });
 
@@ -571,7 +571,7 @@ export default async function settingsRoutes(fastify) {
           },
         },
       },
-      preHandler: [fastify.authenticate],
+      preHandler: [fastify.authorize('settings:manage')],
     },
     settingsController.createBackup
   );
@@ -646,7 +646,7 @@ export default async function settingsRoutes(fastify) {
           },
         },
       },
-      preHandler: [fastify.authenticate],
+      preHandler: [fastify.authorize('settings:read')],
     },
     settingsController.listBackups
   );
@@ -675,7 +675,7 @@ export default async function settingsRoutes(fastify) {
           },
         },
       },
-      preHandler: [fastify.authenticate],
+      preHandler: [fastify.authorize('settings:delete')],
     },
     settingsController.deleteBackup
   );
@@ -704,7 +704,7 @@ export default async function settingsRoutes(fastify) {
           },
         },
       },
-      preHandler: [fastify.authenticate],
+      preHandler: [fastify.authorize('settings:update')],
     },
     settingsController.restoreBackup
   );
@@ -733,7 +733,7 @@ export default async function settingsRoutes(fastify) {
           },
         },
       },
-      preHandler: [fastify.authenticate],
+      preHandler: [fastify.authorize('settings:read')],
     },
     settingsController.downloadBackup
   );

@@ -4,7 +4,7 @@
       <!-- Header -->
       <v-card-title class="text-center py-6">
         <v-icon color="primary" size="64" class="mb-2">mdi-party-popper</v-icon>
-        <h2 class="text-h5 font-semibold text-primary mb-1">🎉 مرحباً بك في نظام CodeLIMS 🎉</h2>
+        <h2 class="text-h5 font-semibold text-primary mb-1">🎉 مرحباً بك في نظام nuqtaplus 🎉</h2>
         <p class="text-body-2 text-gray-600">تم إنشاء حساب المدير الافتراضي بنجاح!</p>
       </v-card-title>
 

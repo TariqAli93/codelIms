@@ -3,9 +3,9 @@ import { PermissionController } from '../controllers/permissionController.js';
 const permissionController = new PermissionController();
 
 export default async function permissionRoutes(fastify) {
-  // Admin-only effectively via admin bypass
+  // Permissions
   fastify.get('/', {
-    onRequest: [fastify.authenticate],
+    onRequest: [fastify.authorize('permissions:read')],
     handler: permissionController.list.bind(permissionController),
     schema: {
       description: 'List permissions',
@@ -15,7 +15,7 @@ export default async function permissionRoutes(fastify) {
   });
 
   fastify.get('/:id', {
-    onRequest: [fastify.authenticate],
+    onRequest: [fastify.authorize('permissions:read')],
     handler: permissionController.getById.bind(permissionController),
     schema: {
       description: 'Get permission by id',
@@ -25,7 +25,7 @@ export default async function permissionRoutes(fastify) {
   });
 
   fastify.post('/', {
-    onRequest: [fastify.authenticate],
+    onRequest: [fastify.authorize('permissions:create')],
     handler: permissionController.create.bind(permissionController),
     schema: {
       description: 'Create permission',
@@ -35,7 +35,7 @@ export default async function permissionRoutes(fastify) {
   });
 
   fastify.put('/:id', {
-    onRequest: [fastify.authenticate],
+    onRequest: [fastify.authorize('permissions:update')],
     handler: permissionController.update.bind(permissionController),
     schema: {
       description: 'Update permission',
@@ -45,7 +45,7 @@ export default async function permissionRoutes(fastify) {
   });
 
   fastify.delete('/:id', {
-    onRequest: [fastify.authenticate],
+    onRequest: [fastify.authorize('permissions:delete')],
     handler: permissionController.remove.bind(permissionController),
     schema: {
       description: 'Delete permission',

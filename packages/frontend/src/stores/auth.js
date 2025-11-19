@@ -26,6 +26,9 @@ export const useAuthStore = defineStore('auth', {
       const permissionList = Array.isArray(permission) ? permission : [permission];
 
       return permissionList.some((perm) => {
+        // Skip invalid permission values
+        if (!perm || typeof perm !== 'string') return false;
+
         // Direct permission match
         if (perms.includes(perm)) return true;
 

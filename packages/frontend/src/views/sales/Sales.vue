@@ -98,6 +98,7 @@
             color="error"
             v-if="item.status !== 'cancelled'"
             icon
+            :disabled="!isAdmin"
             @click.stop="deleteSale(item.id)"
           >
             <v-icon>mdi-delete</v-icon>
@@ -109,6 +110,7 @@
             color="success"
             v-if="item.status === 'cancelled'"
             icon
+            :disabled="!isAdmin"
             @click.stop="restoreSale(item.id)"
           >
             <v-icon>mdi-restore</v-icon>
@@ -124,10 +126,12 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useSaleStore } from '@/stores/sale';
 import { useCustomerStore } from '@/stores/customer';
+import { useAuthStore } from '../../stores/auth';
 
 const router = useRouter();
 const saleStore = useSaleStore();
 const customerStore = useCustomerStore();
+const authStore = useAuthStore();
 
 const filters = ref({
   status: null,
@@ -137,6 +141,9 @@ const filters = ref({
 });
 
 const customers = ref([]);
+const userRoles = ref(authStore?.userRole.name ? [authStore.userRole.name] : null);
+const userPermissions = ref(authStore?.user?.permissions ? authStore.user.permissions : null);
+const isAdmin = userRoles.value == 'admin' || userPermissions.value?.includes('manage:sales');
 
 const statusOptions = [
   { title: 'مكتمل', value: 'completed' },
@@ -222,10 +229,10 @@ const customFilter = (itemText, queryText, item) => {
   return name.includes(query) || phone.includes(query);
 };
 
-onMounted(() => {
-  saleStore.fetchSales();
-  customerStore.fetchCustomers().then(() => {
-    customers.value = customerStore.customers;
-  });
+onMounted(async () => {
+  await saleStore.fetchSales();
+  await customerStore.fetchCustomers();
+  customers.value = customerStore.customers;
+  console.log(userRoles.value);
 });
 </script>

@@ -3,6 +3,8 @@ import { useAuthStore } from '@/stores/auth';
 import { useNotificationStore } from '@/stores/notification';
 import { useLoadingStore } from '@/stores/loading';
 import router from '@/router';
+import { buildArabicErrorMessage, extractArabicDetails } from '@/utils/errorTranslator';
+import { useErrorDialogStore } from '@/stores/errorDialog';
 
 const api = axios.create({
   baseURL: 'http://127.0.0.1:3050/api',
@@ -58,17 +60,22 @@ api.interceptors.response.use(
 
     const notificationStore = useNotificationStore();
 
+    // Build a precise, user-friendly message from backend response
+    const buildMessage = (err) => buildArabicErrorMessage(err);
+
     // Handle 401 Unauthorized
     if (error.response?.status === 401) {
       const authStore = useAuthStore();
       authStore.logout();
       router.push({ name: 'Login' });
-      notificationStore.error('انتهت صلاحية الجلسة. يرجى تسجيل الدخول مرة أخرى');
+      notificationStore.error(
+        buildMessage(error) || 'انتهت صلاحية الجلسة. يرجى تسجيل الدخول مرة أخرى'
+      );
       return Promise.reject(error.response?.data || error.message);
     }
 
     // Handle 429 Rate Limit
-    if (error.response?.status === 429) {
+    if (error.response?.status === 401) {
       const retryAfter = error.response.headers['retry-after'] || 40;
       notificationStore.warning(`تم تجاوز حد الطلبات. حاول مرة أخرى بعد ${retryAfter} ثانية`, 6000);
       return Promise.reject(error.response?.data || error.message);
@@ -76,19 +83,19 @@ api.interceptors.response.use(
 
     // Handle 403 Forbidden
     if (error.response?.status === 403) {
-      notificationStore.error('ليس لديك صلاحية للوصول إلى هذا المورد');
+      notificationStore.error(buildMessage(error) || 'ليس لديك صلاحية للوصول إلى هذا المورد');
       return Promise.reject(error.response?.data || error.message);
     }
 
     // Handle 404 Not Found
     if (error.response?.status === 404) {
-      notificationStore.error('المورد المطلوب غير موجود');
+      notificationStore.error(buildMessage(error) || 'المورد المطلوب غير موجود');
       return Promise.reject(error.response?.data || error.message);
     }
 
     // Handle 500 Server Error
     if (error.response?.status >= 500) {
-      notificationStore.error('خطأ في الخادم. يرجى المحاولة لاحقاً');
+      notificationStore.error(buildMessage(error) || 'خطأ في الخادم. يرجى المحاولة لاحقاً');
       return Promise.reject(error.response?.data || error.message);
     }
 
@@ -104,6 +111,19 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
+    // If we have validation details, show detailed dialog
+    const details = extractArabicDetails(error);
+    if (details.length > 0) {
+      const dialog = useErrorDialogStore();
+      dialog.show({
+        title: 'خطأ في التحقق من البيانات',
+        message: buildMessage(error),
+        details,
+      });
+    } else {
+      // Fallback precise message
+      notificationStore.error(buildMessage(error));
+    }
     return Promise.reject(error.response?.data || error.message);
   }
 );

@@ -3,27 +3,22 @@ import { ref, onMounted } from 'vue';
 import api from '@/plugins/axios';
 import { useRouter } from 'vue-router';
 import { useSimpleLoading } from '@/composables/useLoading';
+import { useNotificationStore } from '@/stores/notification';
 
 const router = useRouter();
+const notification = useNotificationStore();
 
 const backups = ref([]);
 const { isLoading, startLoading, stopLoading } = useSimpleLoading();
-const snackbar = ref(false);
-const snackbarMsg = ref('');
-const snackbarColor = ref('primary');
 
 const createBackup = async () => {
   startLoading();
   try {
     await api.post('/settings/backups', {});
-    snackbarMsg.value = 'تم إنشاء النسخة الاحتياطية بنجاح.';
-    snackbar.value = true;
-    snackbarColor.value = 'success';
+    notification.success('تم إنشاء النسخة الاحتياطية بنجاح');
     await load();
   } catch (error) {
-    snackbarMsg.value = 'فشل في إنشاء النسخة الاحتياطية.';
-    snackbar.value = true;
-    snackbarColor.value = 'error';
+    notification.error('فشل في إنشاء النسخة الاحتياطية');
   } finally {
     stopLoading();
   }
@@ -35,8 +30,7 @@ const load = async () => {
     const response = await api.get('/settings/backups');
     backups.value = response.data;
   } catch (error) {
-    snackbarMsg.value = 'فشل في تحميل قائمة النسخ الاحتياطية.';
-    snackbar.value = true;
+    notification.error('فشل في تحميل قائمة النسخ الاحتياطية');
   } finally {
     stopLoading();
   }
@@ -46,14 +40,10 @@ const deleteBackup = async (filename) => {
   startLoading();
   try {
     await api.delete(`/settings/backups/${filename}`);
-    snackbarMsg.value = 'تم حذف النسخة الاحتياطية بنجاح.';
-    snackbar.value = true;
-    snackbarColor.value = 'success';
+    notification.success('تم حذف النسخة الاحتياطية بنجاح');
     await load();
   } catch (error) {
-    snackbarMsg.value = 'فشل في حذف النسخة الاحتياطية.';
-    snackbar.value = true;
-    snackbarColor.value = 'error';
+    notification.error('فشل في حذف النسخة الاحتياطية');
   } finally {
     stopLoading();
   }
@@ -64,9 +54,7 @@ const restoreBackup = async (id) => {
   try {
     await window.electronAPI.stopBackend();
     await api.get(`/settings/backups/${id}/restore`);
-    snackbarMsg.value = 'تم استعادة النسخة الاحتياطية بنجاح.';
-    snackbar.value = true;
-    snackbarColor.value = 'success';
+    notification.success('تم استعادة النسخة الاحتياطية بنجاح');
     await window.electronAPI.startBackend();
 
     // إعادة تحميل التطبيق بعد الاستعادة
@@ -75,9 +63,7 @@ const restoreBackup = async (id) => {
       router.push('/');
     }, 2000);
   } catch (error) {
-    snackbarMsg.value = 'فشل في استعادة النسخة الاحتياطية.';
-    snackbar.value = true;
-    snackbarColor.value = 'error';
+    notification.error('فشل في استعادة النسخة الاحتياطية');
   } finally {
     stopLoading();
   }
@@ -151,14 +137,6 @@ onMounted(async () => {
       </v-btn>
     </v-card-actions>
   </v-card>
-
-  <!-- Snackbar -->
-  <v-snackbar v-model="snackbar" :timeout="4000" location="top" :color="snackbarColor">
-    {{ snackbarMsg }}
-    <template #actions>
-      <v-btn color="white" variant="text" @click="snackbar = false">إغلاق</v-btn>
-    </template>
-  </v-snackbar>
 </template>
 
 <style scoped></style>

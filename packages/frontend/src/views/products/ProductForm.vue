@@ -52,10 +52,21 @@
             </v-col>
             <v-col cols="12" md="6">
               <v-text-field
+                v-if="!isEdit || isAdmin || costPriceUnlocked"
                 v-model.number="formData.costPrice"
                 label="سعر التكلفة"
                 type="number"
                 :rules="[rules.required]"
+              ></v-text-field>
+              <v-text-field
+                v-else
+                :model-value="'*******'"
+                label="سعر التكلفة"
+                readonly
+                append-inner-icon="mdi-lock"
+                @click:append-inner="showAdminVerifyDialog = true"
+                hint="يتطلب صلاحيات الأدمن للعرض"
+                persistent-hint
               ></v-text-field>
             </v-col>
             <v-col cols="12" md="6">
@@ -111,6 +122,57 @@
         </v-form>
       </v-card-text>
     </v-card>
+
+    <!-- Admin Verification Dialog -->
+    <v-dialog v-model="showAdminVerifyDialog" max-width="500" persistent>
+      <v-card>
+        <v-card-title class="bg-primary text-white">
+          <v-icon start>mdi-shield-lock</v-icon>
+          تحقق من صلاحيات الأدمن
+        </v-card-title>
+
+        <v-card-text class="pt-4">
+          <v-alert type="info" variant="tonal" class="mb-4">
+            لعرض سعر التكلفة، يجب إدخال بيانات مستخدم أدمن
+          </v-alert>
+
+          <v-form ref="adminForm" @submit.prevent="verifyAdmin">
+            <v-text-field
+              v-model="adminCredentials.username"
+              label="اسم المستخدم"
+              prepend-inner-icon="mdi-account"
+              :rules="[rules.required]"
+              :error="adminVerifyError"
+            ></v-text-field>
+
+            <v-text-field
+              v-model="adminCredentials.password"
+              label="كلمة المرور"
+              type="password"
+              prepend-inner-icon="mdi-lock"
+              :rules="[rules.required]"
+              :error="adminVerifyError"
+              :error-messages="adminVerifyError ? adminVerifyErrorMessage : ''"
+            ></v-text-field>
+          </v-form>
+        </v-card-text>
+
+        <v-card-actions>
+          <v-spacer />
+          <v-btn variant="text" @click="closeAdminDialog" :disabled="adminVerifyLoading">
+            إلغاء
+          </v-btn>
+          <v-btn
+            color="primary"
+            @click="verifyAdmin"
+            :loading="adminVerifyLoading"
+            prepend-icon="mdi-check"
+          >
+            تحقق
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
@@ -119,13 +181,19 @@ import { ref, onMounted, computed, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useProductStore } from '@/stores/product';
 import { useCategoryStore } from '@/stores/category';
+import { useAuthStore } from '@/stores/auth';
+import { useNotificationStore } from '@/stores/notification';
+import api from '@/plugins/axios';
 
 const router = useRouter();
 const route = useRoute();
 const productStore = useProductStore();
 const categoryStore = useCategoryStore();
+const authStore = useAuthStore();
+const notification = useNotificationStore();
 
 const form = ref(null);
+const adminForm = ref(null);
 const loading = ref(false);
 const categories = ref([]);
 const formData = ref({
@@ -142,6 +210,17 @@ const formData = ref({
   status: 'available',
 });
 
+// Admin verification state
+const showAdminVerifyDialog = ref(false);
+const adminCredentials = ref({
+  username: '',
+  password: '',
+});
+const adminVerifyLoading = ref(false);
+const adminVerifyError = ref(false);
+const adminVerifyErrorMessage = ref('');
+const costPriceUnlocked = ref(false);
+
 const statusOptions = [
   { title: 'متاح', value: 'available' },
   { title: 'نفذ', value: 'out_of_stock' },
@@ -149,6 +228,7 @@ const statusOptions = [
 ];
 
 const isEdit = computed(() => !!route.params.id);
+const isAdmin = computed(() => authStore.user?.role?.name === 'admin');
 
 const rules = {
   required: (v) => !!v || 'هذا الحقل مطلوب',
@@ -242,6 +322,50 @@ const handleSubmit = async () => {
 const handleBarcodeScan = () => {
   const code = formData.value?.barcode?.trim();
   if (!code) return;
+};
+
+// Admin verification
+const verifyAdmin = async () => {
+  const { valid } = await adminForm.value.validate();
+  if (!valid) return;
+
+  adminVerifyLoading.value = true;
+  adminVerifyError.value = false;
+  adminVerifyErrorMessage.value = '';
+
+  try {
+    const response = await api.post('/auth/login', {
+      username: adminCredentials.value.username,
+      password: adminCredentials.value.password,
+    });
+
+    // Check if user is admin
+    if (response.data?.user?.role?.name === 'admin') {
+      costPriceUnlocked.value = true;
+      notification.success('تم التحقق بنجاح');
+      closeAdminDialog();
+    } else {
+      adminVerifyError.value = true;
+      adminVerifyErrorMessage.value = 'المستخدم ليس لديه صلاحيات أدمن';
+    }
+  } catch (error) {
+    adminVerifyError.value = true;
+    adminVerifyErrorMessage.value =
+      error.response?.data?.message || 'بيانات تسجيل الدخول غير صحيحة';
+  } finally {
+    adminVerifyLoading.value = false;
+  }
+};
+
+const closeAdminDialog = () => {
+  showAdminVerifyDialog.value = false;
+  adminCredentials.value = {
+    username: '',
+    password: '',
+  };
+  adminVerifyError.value = false;
+  adminVerifyErrorMessage.value = '';
+  adminForm.value?.resetValidation();
 };
 
 // مراقبة تغيير اسم المنتج وتوليد SKU تلقائياً

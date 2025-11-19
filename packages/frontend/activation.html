@@ -2,298 +2,574 @@
 <html lang="ar" dir="rtl">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>تفعيل البرنامج</title>
-    <style>
-      :root {
-        --bg: #f4f5f7;
-        --fg: #2f2f2f;
-        --accent: #4a5fd0;
-        --border: #d0d0d5;
-        --shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
-        --radius: 10px;
-        --card: #ffffff;
-      }
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Codel Activation</title>
 
-      @media (prefers-color-scheme: dark) {
-        :root {
-          --bg: #1e1f24;
-          --fg: #e5e5e7;
-          --accent: #7e8fff;
-          --border: #2e2f36;
-          --card: #2a2b31;
-          --shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
-        }
+    <style>
+      @import url('./src/styles/fonts.css');
+      @import url('./src/styles/main.css');
+      @import url('./src/styles/tailwind.css');
+
+      :root {
+        --accent: #5b4df2;
+        --accent-hover: #6d60ff;
+        --fg: #e5e6eb;
+        --border: rgba(255, 255, 255, 0.13);
+        --mica: rgba(28, 28, 30, 1);
+        --card-bg: rgba(255, 255, 255, 0.06);
+        --card-bg-hover: rgba(255, 255, 255, 0.1);
+        --danger: #ff4a4a;
+        --success: #48d18d;
       }
 
       * {
         box-sizing: border-box;
+        margin: 0;
+        padding: 0;
       }
 
       body {
-        margin: 0;
-        padding: 0;
-        height: 100vh;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        background: var(--bg);
+        background: var(--mica);
         color: var(--fg);
-        font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-      }
-
-      .window {
-        border-radius: var(--radius);
-        width: 420px;
-        max-width: 90%;
+        animation: fade-in 0.25s ease-out;
+        user-select: none;
         overflow: hidden;
+        display: grid;
+        place-items: center;
+        height: 100vh;
+        width: 100vw;
+        padding-inline: 1rem;
       }
 
-      .titlebar {
-        background: linear-gradient(to right, #e6e8f1, #dfe2ee);
-        border-bottom: 1px solid var(--border);
+      /* LAYOUT ----------------------------------------- */
+      .window {
+        display: grid;
+        grid-template-rows: 1fr auto;
+        gap: 20px;
+        padding: 10px;
+        width: 100%;
+      }
+
+      /* TOP BAR ---------------------------------------- */
+      .topbar {
         display: flex;
         align-items: center;
-        padding: 8px 12px;
-        user-select: none;
+        gap: 10px;
+        -webkit-app-region: drag;
       }
 
-      @media (prefers-color-scheme: dark) {
-        .titlebar {
-          background: #24252b;
-          border-bottom-color: #35363f;
-        }
+      .topbar img {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
       }
 
-      .titlebar .app-icon {
-        width: 18px;
-        height: 18px;
-        border-radius: 4px;
-        background: var(--accent);
+      .topbar-title {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .topbar-title h1 {
+        font-size: 20px;
+        font-weight: 700;
+      }
+
+      .topbar-title p {
+        font-size: 13px;
+        opacity: 0.7;
+      }
+
+      .close-btn {
+        margin-right: auto;
+        -webkit-app-region: no-drag;
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        border: none;
+        background: transparent;
+        color: #aaa;
+        cursor: pointer;
+        font-size: 18px;
+        transition: 0.2s;
+      }
+
+      .close-btn:hover {
+        background: rgba(255, 0, 0, 0.22);
+        color: var(--danger);
+      }
+
+      /* CARDS GRID ------------------------------------- */
+      .cards-grid {
+        display: block;
+      }
+
+      .card {
+        background: var(--card-bg);
+        border-radius: 14px;
+        border: 1px solid var(--border);
+        padding: 16px 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        transition: 0.18s ease-out;
+      }
+
+      /* CARD HEADER ------------------------------------ */
+      .card-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .card-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 10px;
         display: flex;
         align-items: center;
         justify-content: center;
-        color: #fff;
-        font-size: 12px;
-        margin-inline-end: 8px;
+        background: radial-gradient(circle at 30% 0%, #ffffff44, #5b4df222);
+        color: var(--accent);
+        font-size: 18px;
       }
 
-      .titlebar .title {
-        font-weight: 600;
-        flex-grow: 1;
-        font-size: 14px;
-      }
-
-      .controls {
+      .card-title-block {
         display: flex;
+        flex-direction: column;
+      }
+
+      .card-title-block h2 {
+        font-size: 15px;
+        font-weight: 600;
+      }
+
+      .card-title-block p {
+        font-size: 12px;
+        opacity: 0.7;
+      }
+
+      /* FORM FIELDS ------------------------------------ */
+      .field {
+        display: flex;
+        flex-direction: column;
         gap: 6px;
       }
 
-      .ctrl-btn {
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-        border: none;
-        cursor: pointer;
-        opacity: 0.9;
-      }
-      .ctrl-close {
-        background: #ff5f57;
-      }
-      .ctrl-min {
-        background: #f4c430;
-      }
-      .ctrl-max {
-        background: #27c93f;
+      .field label {
+        font-size: 13px;
+        opacity: 0.78;
       }
 
-      .window-body {
-        padding: 24px;
-      }
-
-      .logo {
-        text-align: center;
-        margin-bottom: 20px;
-      }
-
-      .logo-icon {
-        width: 64px;
-        height: 64px;
-        border-radius: 16px;
-        background: var(--accent);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        color: #fff;
-        font-size: 30px;
-        margin: 0 auto 12px;
-      }
-
-      h1 {
-        font-size: 20px;
-        text-align: center;
-        margin-bottom: 8px;
-      }
-
-      p.subtitle {
-        text-align: center;
-        color: #777;
-        font-size: 14px;
-        margin-bottom: 24px;
-      }
-
-      label {
-        display: block;
-        font-size: 14px;
-        font-weight: 600;
-        margin-bottom: 6px;
-      }
-
-      input[type='text'] {
+      .input-box,
+      textarea {
+        margin-top: 2px;
         width: 100%;
-        padding: 12px;
-        font-size: 16px;
-        text-align: center;
-        border-radius: var(--radius);
+        padding: 10px 12px;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.08);
         border: 1px solid var(--border);
-        outline: none;
-        background: #fafafa;
-        letter-spacing: 2px;
-        font-family: 'Courier New', monospace;
-        transition: border-color 0.2s;
+        color: var(--fg);
+        font-size: 14px;
+        transition: 0.18s;
       }
 
-      input[type='text']:focus {
+      textarea {
+        resize: none;
+        min-height: 100px;
+      }
+
+      .input-box:hover,
+      textarea:hover {
+        background: rgba(255, 255, 255, 0.12);
+      }
+
+      .input-box:focus,
+      textarea:focus {
+        background: rgba(255, 255, 255, 0.14);
         border-color: var(--accent);
-        background: #fff;
+        box-shadow: 0 0 0 2px rgba(91, 77, 242, 0.35);
+        outline: none;
       }
 
-      .buttons {
-        margin-top: 16px;
+      .inline-actions {
         display: flex;
         align-items: center;
-        justify-items: center;
-        justify-content: space-between;
         gap: 8px;
+        margin-top: 8px;
       }
 
-      button {
-        width: 100%;
-        padding: 12px;
-        background: var(--accent);
+      /* BUTTONS ---------------------------------------- */
+      .btn {
+        padding: 5px 10px;
+        border-radius: 10px;
         border: none;
+        cursor: pointer;
+        font-size: 13px;
+        transition: 0.18s;
+        white-space: nowrap;
+      }
+
+      .btn.accent {
+        background: var(--accent);
         color: #fff;
         font-weight: 600;
-        border-radius: var(--radius);
-        cursor: pointer;
-        font-size: 16px;
-        transition: all 0.2s ease;
+        box-shadow: 0 8px 28px rgba(91, 77, 242, 0.35);
       }
 
-      button:hover {
-        background: #394abf;
+      .btn.accent:hover {
+        background: var(--accent-hover);
       }
 
-      button#cancelButton {
-        background: #ff5f57;
+      .btn.neutral {
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--fg);
       }
 
-      button#cancelButton:hover {
-        background: #e04843;
+      .btn.neutral:hover {
+        background: rgba(255, 255, 255, 0.13);
       }
 
-      .message {
-        margin-top: 16px;
-        text-align: center;
-        padding: 10px;
-        border-radius: var(--radius);
-        font-size: 14px;
+      /* STATUS ----------------------------------------- */
+      .status {
+        margin-top: 8px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.06);
+        font-size: 13px;
+      }
+
+      .status.success {
+        background: rgba(48, 170, 110, 0.24);
+        color: var(--success);
+      }
+
+      .status.fail {
+        background: rgba(160, 40, 40, 0.24);
+        color: var(--danger);
+      }
+
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        border: 0;
+      }
+
+      /* SIDE CARD TEXT --------------------------------- */
+      .hint-text {
+        font-size: 13px;
+        opacity: 0.8;
+        line-height: 1.6;
+      }
+
+      .hint-list {
+        margin-top: 6px;
+        padding-right: 16px;
+        font-size: 12px;
+        opacity: 0.85;
+      }
+
+      .hint-list li {
+        margin-bottom: 3px;
+      }
+
+      @keyframes fade-in {
+        from {
+          opacity: 0;
+          transform: translateY(8px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* ============================================
+   DIALOG — WINDOWS SECURITY STYLE
+   ============================================ */
+
+      /* الخلفية */
+      dialog::backdrop {
+        background: rgba(0, 0, 0, 1);
+        backdrop-filter: blur(6px);
+        width: 100%;
+        height: 100%;
+      }
+
+      /* صندوق الحوار */
+      dialog {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        border: none;
+        padding: 0;
+        background: var(--mica);
+
+        /* تمركز تلقائي */
+        /* display: grid;
+        place-items: center; */
         display: none;
+
+        /* الحركة */
+        animation: fadeScale 0.22s ease-out;
       }
 
-      .message.success {
-        background: #e6f4ea;
-        color: #2e7d32;
+      /* الحركة */
+      @keyframes fadeScale {
+        from {
+          opacity: 0;
+          transform: scale(0.92);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
       }
 
-      .message.error {
-        background: #fdecea;
-        color: #c62828;
+      /* البطاقة داخل الحوار */
+      dialog .card {
+        width: 420px;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.07);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        backdrop-filter: blur(18px) saturate(180%);
+        -webkit-backdrop-filter: blur(18px) saturate(180%);
+        padding: 20px 24px;
+        box-shadow: 0 12px 48px rgba(0, 0, 0, 0.35);
+        animation: cardIn 0.3s ease-out;
+      }
+
+      @keyframes cardIn {
+        from {
+          transform: translateY(10px);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+
+      /* تحسين رأس البطاقة */
+      .card-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .card-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: radial-gradient(circle at 30% 0%, #ffffff33, #5b4df222);
+        color: #5b4df2;
+        font-size: 18px;
+      }
+
+      #helpDialog.open {
+        display: grid;
+        place-items: center;
+      }
+
+      .divider {
+        height: 1px;
+        background: var(--border);
+        margin: 2px 0;
       }
     </style>
   </head>
-
   <body>
-    <div class="window">
-      <div class="window-body">
-        <div class="logo">
-          <div class="logo-icon">🔒</div>
-          <h1>تفعيل البرنامج</h1>
-          <p class="subtitle">أدخل كود التفعيل لبدء الاستخدام</p>
+    <main class="window">
+      <!-- TOPBAR مثل Windows -->
+      <div class="topbar">
+        <img src="./build/icon.png" alt="Codel" />
+        <div class="topbar-title">
+          <h1>تفعيل نظام نقطة</h1>
+          <p>حافظ على عمل النظام بشكل رسمي وآمن من خلال التفعيل.</p>
         </div>
-
-        <form id="activationForm">
-          <label for="licenseKey">كود التفعيل</label>
-          <input
-            type="text"
-            id="licenseKey"
-            placeholder="XXXX-XXXX-XXXX-XXXX"
-            maxlength="19"
-            required
-          />
-          <div class="buttons">
-            <button type="submit">تفعيل</button>
-            <button type="button" id="cancelButton" onclick="window.close()">إلغاء</button>
-          </div>
-          <div class="message" id="message"></div>
-        </form>
+        <button id="closeBtn" class="close-btn">✕</button>
       </div>
-    </div>
+
+      <div class="divider"></div>
+
+      <!-- CARDS GRID مثل Windows Security -->
+      <div class="cards-grid">
+        <!-- CARD 1: التفعيل -->
+        <section class="card">
+          <div class="card-header">
+            <div class="card-icon">✔</div>
+            <div class="card-title-block">
+              <h2>تفعيل النظام</h2>
+              <p>أدخل كود التفعيل أو حمّل ملف الرخصة لإكمال العملية.</p>
+            </div>
+          </div>
+
+          <div class="field" style="margin-top: 10px">
+            <label>كود الجهاز</label>
+            <div class="inline-actions">
+              <input id="machineId" class="input-box" readonly />
+              <button id="copyMachineId" class="btn neutral">نسخ</button>
+            </div>
+          </div>
+
+          <div class="field" style="margin-top: 10px">
+            <label>كود التفعيل</label>
+            <textarea id="licenseInput" placeholder="الصق كود التفعيل هنا..."></textarea>
+
+            <div class="inline-actions">
+              <button id="activateBtn" class="btn accent">تفعيل</button>
+              <button id="chooseFileBtn" class="btn neutral">اختيار ملف</button>
+
+              <div style="flex: 1"></div>
+              <button id="callSupport" class="btn neutral">دعم ومساعدة</button>
+              <input id="fileInput" type="file" class="sr-only" />
+            </div>
+          </div>
+
+          <div id="statusBox" class="status">بانتظار التفعيل...</div>
+        </section>
+      </div>
+
+      <dialog id="helpDialog" class="mica">
+        <section class="card">
+          <div class="card-header">
+            <div class="card-icon">ⓘ</div>
+            <div class="card-title-block">
+              <h2>الدعم والمساعدة</h2>
+              <p>تواصل سريع مع فريق Codel أو تحقق من بيانات التفعيل.</p>
+            </div>
+
+            <div style="flex: 1"></div>
+
+            <button id="closeHelpDialogBtn" class="close-btn">✕</button>
+          </div>
+
+          <div class="divider"></div>
+
+          <p class="hint-text">
+            إذا واجهت أي مشكلة أثناء التفعيل، يمكنك إرسال كود الجهاز مباشرة لفريق الدعم ليتم إنشاء
+            رخصة خاصة بجهازك.
+          </p>
+
+          <ul class="hint-list">
+            <li>تأكد من عدم تعديل كود التفعيل.</li>
+            <li>تأكد من أن التاريخ والوقت في النظام مضبوطان.</li>
+            <li>حافظ على ملف الرخصة في مكان آمن.</li>
+          </ul>
+
+          <div class="inline-actions" style="margin-top: 10px">
+            <button id="supportBtn" class="btn neutral" style="flex: 1">
+              تواصل مع الدعم عبر واتساب
+            </button>
+          </div>
+        </section>
+      </dialog>
+    </main>
 
     <script>
-      const form = document.getElementById('activationForm');
-      const input = document.getElementById('licenseKey');
-      const message = document.getElementById('message');
+      const $ = (s) => document.querySelector(s);
 
-      input.addEventListener('input', (e) => {
-        let value = e.target.value.replace(/[^A-Z0-9]/gi, '').toUpperCase();
-        let formatted = '';
-        for (let i = 0; i < value.length && i < 16; i++) {
-          if (i > 0 && i % 4 === 0) formatted += '-';
-          formatted += value[i];
+      const machineIdInput = $('#machineId');
+      const licenseInput = $('#licenseInput');
+      const copyBtn = $('#copyMachineId');
+      const activateBtn = $('#activateBtn');
+      const chooseFileBtn = $('#chooseFileBtn');
+      const fileInput = $('#fileInput');
+      const statusBox = $('#statusBox');
+      const supportBtn = $('#supportBtn');
+      const closeBtn = $('#closeBtn');
+
+      async function loadMachineId() {
+        if (window.electronAPI?.invoke) {
+          const id = await window.electronAPI.invoke('license:getMachineId');
+          machineIdInput.value = id;
+        } else {
+          machineIdInput.value = 'SAMPLE-ID';
         }
-        e.target.value = formatted;
-      });
-
-      form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        message.style.display = 'none';
-
-        const licenseKey = input.value.trim();
-        if (!licenseKey) {
-          showMessage('يرجى إدخال كود التفعيل', 'error');
-          return;
-        }
-
-        try {
-          // استخدام API التفعيل العادي
-          const result = await window.electronAPI.activateLicense(licenseKey);
-
-          if (result?.success) {
-            showMessage('تم التفعيل بنجاح! جاري فتح البرنامج...', 'success');
-          } else {
-            showMessage(result?.message || 'فشل التفعيل، تحقق من الكود.', 'error');
-          }
-        } catch (error) {
-          showMessage('حدث خطأ أثناء التحقق من التفعيل', 'error');
-        }
-      });
-
-      function showMessage(text, type) {
-        message.textContent = text;
-        message.className = `message ${type}`;
-        message.style.display = 'block';
       }
+      loadMachineId();
+
+      copyBtn.onclick = async () => {
+        await navigator.clipboard.writeText(machineIdInput.value);
+        status('✔ تم نسخ كود الجهاز', 'success');
+      };
+
+      supportBtn.onclick = () => {
+        const phone = '9647884841993';
+        const msg = `مرحباً، أحتاج تفعيل النظام.\nكود الجهاز: ${machineIdInput.value}`;
+        const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
+        window.electronAPI?.openExternal(url) ?? window.open(url);
+      };
+
+      activateBtn.onclick = async (e) => {
+        e.preventDefault();
+        const code = licenseInput.value.trim();
+        if (!code) return status('✖ كود غير صالح', 'fail');
+        const res = await window.electronAPI.invoke('license:activateString', code);
+        finish(res);
+      };
+
+      chooseFileBtn.onclick = () => fileInput.click();
+
+      fileInput.onchange = async (e) => {
+        const file = e.target.files[0];
+        const content = await file.text();
+        const res = await window.electronAPI.invoke('license:activateString', content);
+        finish(res);
+      };
+
+      function finish(res) {
+        if (res?.ok) {
+          status('✔ تم التفعيل بنجاح', 'success');
+          setTimeout(() => {
+            window.electronAPI?.invoke('license:closeActivation');
+          }, 1200);
+        } else status('✖ فشل التفعيل', 'fail');
+      }
+
+      function status(text, type) {
+        statusBox.textContent = text;
+        statusBox.className = 'status ' + type;
+      }
+
+      closeBtn.onclick = () => window.electronAPI?.invoke('license:closeActivationWindow');
+
+      // dialog
+      const helpDialog = document.querySelector('#helpDialog');
+      const callSupportBtn = document.getElementById('callSupport');
+      const closeHelpDialogBtn = document.getElementById('closeHelpDialogBtn');
+
+      helpDialog.addEventListener('click', (e) => {
+        const card = helpDialog.querySelector('.card');
+        const rect = card.getBoundingClientRect();
+
+        const inside =
+          e.clientX >= rect.left &&
+          e.clientX <= rect.right &&
+          e.clientY >= rect.top &&
+          e.clientY <= rect.bottom;
+
+        if (!inside) helpDialog.classList.remove('open');
+      });
+
+      callSupportBtn.onclick = () => {
+        helpDialog.classList.add('open');
+      };
+
+      closeHelpDialogBtn.onclick = () => {
+        helpDialog.classList.remove('open');
+      };
     </script>
   </body>
 </html>

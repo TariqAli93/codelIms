@@ -26,7 +26,7 @@
                   <v-icon color="primary">mdi-alpha-c-box</v-icon>
                 </template>
                 <v-list-item-title class="font-weight-bold">اسم البرنامج</v-list-item-title>
-                <v-list-item-subtitle class="mt-1">CodeLIMS</v-list-item-subtitle>
+                <v-list-item-subtitle class="mt-1">نقطة بلس</v-list-item-subtitle>
               </v-list-item>
 
               <v-divider class="my-2"></v-divider>
@@ -48,7 +48,9 @@
                   <v-icon color="primary">mdi-tag</v-icon>
                 </template>
                 <v-list-item-title class="font-weight-bold">الإصدار</v-list-item-title>
-                <v-list-item-subtitle class="mt-1">1.0.0</v-list-item-subtitle>
+                <v-list-item-subtitle class="mt-1">
+                  {{ getAppVersion }}
+                </v-list-item-subtitle>
               </v-list-item>
 
               <v-divider class="my-2"></v-divider>
@@ -193,6 +195,13 @@
 </template>
 
 <script setup>
+import { ref } from 'vue';
+const getAppVersion = ref('');
+
+window.electronAPI?.getVersion().then((version) => {
+  getAppVersion.value = version;
+});
+
 const openExternal = (url) => {
   window.electronAPI.openExternal(url);
 };

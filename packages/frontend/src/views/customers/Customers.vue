@@ -40,6 +40,7 @@
             size="small"
             variant="text"
             color="error"
+            v-can="['delete:customers']"
             @click="confirmDelete(item)"
           ></v-btn>
         </template>

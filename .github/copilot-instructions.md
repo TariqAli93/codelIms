@@ -1,84 +1,60 @@
-# CodeLIMS - Accounting & POS System
+# nuqtaplus – Agent Guide
 
-## Project Overview
+Concise instructions for AI coding agents to work productively on this Electron + Vue 3 + Fastify monorepo.
 
-Desktop application for accounting, point of sale, and installment management system built with Electron, Vue 3, Vuetify, and Fastify.
+## Big Picture
 
-## Technology Stack
+- Monorepo: `packages/backend` (Fastify + SQLite + Drizzle) and `packages/frontend` (Vue 3 + Vuetify + Vite + Electron).
+- Clean architecture on backend: `routes → controllers → services → models (drizzle)`. Validation via Zod, auth via JWT.
+- RBAC is first-class: Backend enforces per-route permissions; Frontend gates routes, menus, and buttons reactively.
 
-- **Frontend**: Electron + Vue 3 + Vuetify 3 + Vite
-- **Backend**: Fastify + SQLite + Drizzle ORM
-- **Authentication**: JWT + bcryptjs
-- **Validation**: Zod
-- **Architecture**: Clean Architecture (routes, controllers, services, models)
-- **Language**: JavaScript (No TypeScript)
-- **Package Manager**: pnpm with workspaces
+## RBAC Model (critical)
 
-## Project Structure
+- Permission naming differs by layer:
+  - Frontend uses `action:resource` (e.g., `view:products`, `read:products`, `manage:*`). Seed sets `permissions.name` this way (`src/seed.js`).
+  - Backend checks `resource:action` strings (e.g., `products:read`) via `fastify.authorize(requiredPermission)` which compares against `permissions.resource` and `permissions.action` (`src/plugins/auth.js`).
+- **View vs Read distinction**:
+  - `view`: Frontend route/menu visibility — user can see the page/menu item.
+  - `read`: Backend API data fetching — user can retrieve data via API.
+  - Routes and menus check `view:resource`, API calls remain protected by `read:resource` on backend.
+- Backend routes should call `fastify.authorize('resource:action')`. Example: `productRoutes.js` uses `products:create|read|update|delete`.
+- Frontend checks permissions via `useAuthStore().hasPermission('action:resource')` and new `v-can` directive.
 
-```
-codelIms/
-├── packages/
-│   ├── backend/          # Fastify API server
-│   └── frontend/         # Electron + Vue 3 app
-├── pnpm-workspace.yaml
-└── package.json
-```
+## Frontend Patterns
 
-## Key Features
+- Routing guard: `src/router/index.js` reads `meta.permission` (string or array) and redirects to `Forbidden` if missing.
+- Menus: `src/layouts/MainLayout.vue` filters items using `authStore.hasPermission(item.permission)`.
+- Buttons/controls: Prefer `v-can="'create:sales'"` or `v-can.hide="['update:products','manage:products']"` to auto-disable/hide based on live store state.
+  - Implemented in `src/plugins/rbac.js` and registered in `src/main.js`.
+- Axios auth: `src/stores/auth.js` manages token/user; `getProfile()` refreshes permissions after reload; `hasPermission` supports `manage:<resource>` and `manage:*`.
 
-- Multi-currency support (USD, IQD)
-- RBAC system with roles and permissions
-- Customer, product, and inventory management
-- Sales with cash and installment payments
-- Advanced reporting and analytics
-- Modern Vuetify UI components
+## Backend Patterns
 
-## Development Guidelines
+- Register auth plugin in server: `src/plugins/auth.js` provides `authenticate` and `authorize(requiredPermission)`.
+- Use `onRequest: [fastify.authorize('resource:action')]` per route where applicable (see `productRoutes.js`, `customerRoutes.js`, `saleRoutes.js`).
+- Some routes currently use only `authenticate` (e.g., roles/permissions/settings) — tighten with `authorize` if restricting to specific roles is desired.
 
-- Use JavaScript only (no TypeScript)
-- Follow Clean Architecture principles
-- Avoid native modules to prevent rebuild issues
-- Use ESLint and Prettier for code quality
-- Implement comprehensive error handling
-- Use Pino for logging
+## Dev Workflows
 
-## Checklist Progress
+- Start both apps (recommended): `pnpm dev` from repo root (uses `concurrently`).
+- Individually:
+  - Backend: `pnpm --filter @nuqtaplus/backend dev`
+  - Frontend: `pnpm --filter @nuqtaplus/frontend electron:dev`
+- Database:
+  - Seed: `pnpm seed`
+  - Drizzle: `pnpm db:generate` then `pnpm db:migrate`
+- Build desktop app: `pnpm build` (packs backend into Electron via `extraResources`).
 
-- [x] Create copilot-instructions.md file
-- [x] Get project setup information
-- [x] Scaffold project structure
-- [x] Configure backend dependencies
-- [x] Configure frontend dependencies
-- [x] Implement backend architecture
-- [x] Implement database schema
-- [x] Implement authentication & RBAC
-- [x] Implement frontend views
-- [x] Implement currency system
-- [x] Configure Electron integration
-- [x] Add reporting & analytics
-- [x] Configure ESLint & Prettier
-- [x] Create documentation
-- [x] Test and verify build
+## Conventions & Examples
 
-## Project Status: ✅ COMPLETED
+- Add a secure endpoint: in `routes/fooRoutes.js` use `onRequest: [fastify.authorize('foo:create')]` → controller → service.
+- Add a gated view: set `meta: { permission: 'read:foo' }` in router, hide side-menu via `permission` key in menu definition, and guard buttons with `v-can`.
+- Permission labels: Frontend displays and groups permissions in `views/permissions/Permissions.vue` and `views/roles/Roles.vue`.
 
-All features have been implemented successfully!
+## Quick References
 
-### What's Ready:
+- RBAC seed matrix: `src/seed.js` (`permissionsList` and default role mappings for `admin`, `manager`, `sales`).
+- Models (Drizzle): `src/models/schema.js`; DB access via `src/db.js`.
+- Error types: `src/utils/errors.js`; global error handler plugin: `src/plugins/errorHandler.js`.
 
-- Complete Backend API with Fastify
-- Full Frontend with Vue 3 + Vuetify + Electron
-- Authentication & RBAC System
-- Multi-currency support (USD/IQD)
-- All CRUD operations
-- Dashboard with analytics
-- Sales management system
-- Customer & Product management
-- Category management
-- Reports & Settings pages
-
-### Next Steps:
-
-See SETUP_GUIDE.md for installation instructions.
-The only requirement is installing build tools for better-sqlite3.
+Notes: Keep JavaScript only (no TS). Use Zod for request validation, Pinia for state, and prefer `v-can` over ad-hoc `:disabled` checks for consistent UX.

@@ -157,18 +157,13 @@
         </v-expand-transition>
       </v-card-text>
     </v-card>
-
-    <!-- إشعار العميل المحدد -->
-    <v-snackbar v-model="showNotification" :color="notificationColor" timeout="3000">
-      <v-icon class="ml-2">{{ notificationIcon }}</v-icon>
-      {{ notificationMessage }}
-    </v-snackbar>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue';
 import { useCustomerStore } from '@/stores/customer';
+import { useNotificationStore } from '@/stores/notification';
 
 const props = defineProps({
   modelValue: {
@@ -188,6 +183,7 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue', 'customer-selected']);
 
 const customerStore = useCustomerStore();
+const notification = useNotificationStore();
 
 // Reactive data
 const showSelector = ref(!props.modelValue);
@@ -207,14 +203,6 @@ const newCustomerData = ref({
   city: '',
   address: '',
   notes: '',
-});
-
-// Notifications
-const showNotification = ref(false);
-const notificationMessage = ref('');
-const notificationColor = ref('success');
-const notificationIcon = computed(() => {
-  return notificationColor.value === 'success' ? 'mdi-check-circle' : 'mdi-alert-circle';
 });
 
 // Validation rules
@@ -409,15 +397,11 @@ const resetNewCustomerForm = () => {
 };
 
 const showSuccessNotification = (message) => {
-  notificationMessage.value = message;
-  notificationColor.value = 'success';
-  showNotification.value = true;
+  notification.success(message);
 };
 
 const showErrorNotification = (message) => {
-  notificationMessage.value = message;
-  notificationColor.value = 'error';
-  showNotification.value = true;
+  notification.error(message);
 };
 
 // Watch for prop changes

@@ -1,34 +1,28 @@
 import { app, BrowserWindow, ipcMain, dialog, shell } from 'electron';
 import { fileURLToPath } from 'url';
 import path, { dirname, join } from 'path';
-import { promises as fs } from 'fs';
-import logger from './logger.js';
-import BackendManager from './backendManager.js';
-import LicenseValidator from './licenseValidator.js';
-import Store from 'electron-store';
-import { getStoreConfig } from './storeConfig.js';
+import { promises as fs } from 'fs-extra';
+import logger from '../scripts/logger.js';
+import BackendManager from '../scripts/backendManager.js';
+import { getMachineId, saveLicenseString, verifyLicense } from '../scripts/licenseManager.js';
 
 // --- المتغيرات العامة ---
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const isDev = !app.isPackaged;
 
-let mainWindow;
+let mainWindow = null;
+let activationWindow = null;
 let isQuitting = false;
 
-// استخدام نفس إعدادات التشفير في جميع أنحاء التطبيق
-const store = new Store(getStoreConfig());
-const licenseValidator = new LicenseValidator();
 const backendManager = new BackendManager();
 
 // --- منع تشغيل أكثر من نسخة ---
 const gotTheLock = app.requestSingleInstanceLock();
 if (!gotTheLock) {
-  logger.info('Another instance is already running. Exiting...');
   app.quit();
 } else {
   app.on('second-instance', () => {
-    logger.info('Second instance detected. Focusing main window...');
     if (mainWindow) {
       if (mainWindow.isMinimized()) mainWindow.restore();
       mainWindow.focus();
@@ -38,42 +32,32 @@ if (!gotTheLock) {
 
 // --- نافذة البرنامج الرئيسية ---
 function createWindow() {
-  if (mainWindow) {
-    logger.warn('Main window already exists. Focusing...');
-    if (mainWindow.isMinimized()) mainWindow.restore();
-    mainWindow.focus();
-    return;
-  }
+  if (mainWindow) return;
 
   logger.info('Creating main window...');
 
   mainWindow = new BrowserWindow({
     width: 1400,
     height: 900,
-    minWidth: 150,
+    minWidth: 600,
     minHeight: 700,
     autoHideMenuBar: true,
     show: false,
     icon: isDev ? join(__dirname, '../../build/icon.png') : join(__dirname, '../build/icon.png'),
     webPreferences: {
+      devTools: isDev,
       contextIsolation: true,
       nodeIntegration: false,
-      preload: isDev
-        ? join(__dirname, '../preload/preload.mjs')
-        : join(__dirname, '../preload/preload.mjs'),
+      preload: join(__dirname, '../preload/preload.mjs'),
     },
   });
 
-  mainWindow.once('ready-to-show', () => {
-    logger.info('Main window ready to show');
-    mainWindow.show();
-  });
+  mainWindow.once('ready-to-show', () => mainWindow.show());
 
   if (isDev) {
     mainWindow.loadURL('http://localhost:5173');
     mainWindow.webContents.openDevTools();
   } else {
-    // في production، الملفات موجودة في app.asar
     mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
   }
 
@@ -86,18 +70,21 @@ function createWindow() {
 
 // --- نافذة التفعيل ---
 function createActivationWindow() {
-  const activationWindow = new BrowserWindow({
-    width: 400,
-    height: 400,
+  if (activationWindow) return;
+
+  activationWindow = new BrowserWindow({
+    width: 550,
+    height: 700,
     autoHideMenuBar: true,
     frame: false,
     resizable: false,
+    fullscreen: false,
+    fullscreenable: false,
     webPreferences: {
+      devTools: false, // ← أهم شيء
       contextIsolation: true,
       nodeIntegration: false,
-      preload: isDev
-        ? join(__dirname, '../preload/preload.mjs')
-        : join(__dirname, '../preload/preload.mjs'),
+      preload: join(__dirname, '../preload/preload.mjs'),
     },
   });
 
@@ -107,94 +94,38 @@ function createActivationWindow() {
       : path.join(__dirname, '../dist/activation.html')
   );
 
-  // عند إغلاق نافذة التفعيل، إنهاء البرنامج بالكامل
-  activationWindow.on('closed', async () => {
-    logger.info('Activation window closed. Quitting application...');
-    isQuitting = true;
-    await backendManager.CleanupBackendProcess();
-    app.quit();
+  activationWindow.on('closed', () => {
+    logger.info('Activation window closed');
+    activationWindow = null;
   });
 
-  return activationWindow;
+  activationWindow.webContents.on('before-input-event', (event, input) => {
+    if (
+      (input.control && input.shift && input.key.toLowerCase() === 'i') || // Ctrl+Shift+I
+      input.key === 'F12' // F12
+    ) {
+      event.preventDefault();
+    }
+  });
+
+  activationWindow.webContents.on('devtools-opened', () => {
+    activationWindow.webContents.closeDevTools();
+  });
 }
 
 // --- عند جاهزية التطبيق ---
 app.whenReady().then(async () => {
-  if (isQuitting) {
-    logger.info('Application is quitting, aborting startup...');
-    return;
-  }
+  if (isQuitting) return;
 
-  try {
-    logger.info('Starting backend server...');
+  const result = await verifyLicense();
+
+  if (result.ok) {
+    createWindow();
     await backendManager.StartBackend();
-    logger.info('Backend server started successfully');
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-  } catch (error) {
-    logger.error('Failed to start backend server:', error);
-  }
-
-  // if isDev no need to check license
-  if (isDev) {
-    createWindow();
-    return;
-  }
-
-  const licenseCheck = await licenseValidator.checkLicenseOnStartup();
-
-  if (licenseCheck.needsActivation) {
-    const activationWindow = createActivationWindow();
-
-    ipcMain.handle('activate-license', async (_event, licenseKey) => {
-      const result = await licenseValidator.validateLicense(licenseKey);
-      if (result.success) {
-        activationWindow.close();
-
-        setTimeout(() => {
-          createWindow();
-        }, 1000);
-      }
-      return result;
-    });
   } else {
-    createWindow();
+    createActivationWindow();
   }
 
-  // --- إعادة التفعيل من داخل التطبيق ---
-  ipcMain.handle('reactivate-license', async (_event, licenseKey) =>
-    licenseValidator.validateLicense(licenseKey)
-  );
-
-  // --- الحصول على معلومات الترخيص ---
-  ipcMain.handle('get-license-info', async () => ({
-    licenseKey: store.get('licenseKey'),
-    lastValidation: store.get('lastValidation'),
-  }));
-
-  // --- إلغاء التفعيل ---
-  ipcMain.handle('deactivate-license', async () => {
-    try {
-      // حذف بيانات التفعيل
-      store.delete('licenseKey');
-      store.delete('lastValidation');
-
-      // إغلاق النافذة الرئيسية
-      if (mainWindow) {
-        mainWindow.close();
-        mainWindow = null;
-      }
-
-      // فتح نافذة التفعيل
-      createActivationWindow();
-
-      return { success: true };
-    } catch (error) {
-      logger.error('Error during deactivation:', error);
-      return { success: false, message: 'فشل إلغاء التفعيل' };
-    }
-  });
-
-  // macOS: إنشاء نافذة جديدة عند إعادة فتح التطبيق
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0 && !isQuitting) {
       createWindow();
@@ -204,36 +135,28 @@ app.whenReady().then(async () => {
 
 // --- عند إغلاق جميع النوافذ ---
 app.on('window-all-closed', async () => {
-  logger.info('All windows closed');
   isQuitting = true;
   await backendManager.CleanupBackendProcess();
-  // إغلاق التطبيق بغض النظر عن النظام (حتى macOS)
   app.quit();
 });
 
-// --- تنظيف قبل الإغلاق ---
+// --- before quit ---
 app.on('before-quit', async (event) => {
-  if (isQuitting) {
-    logger.info('Application is already quitting, allowing quit');
-    return;
-  }
+  if (isQuitting) return;
 
-  logger.info('Application is about to quit');
   isQuitting = true;
   event.preventDefault();
 
   await backendManager.CleanupBackendProcess();
-
-  // الآن نسمح بالإغلاق
   app.quit();
 });
 
+// --- will quit ---
 app.on('will-quit', async () => {
-  logger.info('Application will quit');
   await backendManager.CleanupBackendProcess();
 });
 
-// --- معلومات التطبيق ---
+// --- IPC: معلومات التطبيق ---
 ipcMain.handle('app:getVersion', () => app.getVersion());
 ipcMain.handle('app:getPlatform', () => process.platform);
 
@@ -241,63 +164,96 @@ ipcMain.handle('app:getPlatform', () => process.platform);
 ipcMain.handle('dialog:showSaveDialog', async (_e, options) =>
   dialog.showSaveDialog(mainWindow, options)
 );
+
 ipcMain.handle('dialog:showOpenDialog', async (_e, options) =>
   dialog.showOpenDialog(mainWindow, options)
 );
 
-// --- File Handlers ---
+// --- File System ---
 ipcMain.handle('file:saveFile', async (_e, filePath, data) => {
-  try {
-    if (!filePath) throw new Error('❌ filePath is undefined');
-    if (!data) throw new Error('❌ data is undefined');
-    const buffer = Buffer.isBuffer(data) ? data : Buffer.from(data);
-    await fs.writeFile(filePath, buffer);
-    return { success: true };
-  } catch (error) {
-    logger.error('Error saving file:', error);
-    throw error;
-  }
+  const buffer = Buffer.isBuffer(data) ? data : Buffer.from(data);
+  await fs.writeFile(filePath, buffer);
+  return { success: true };
 });
 
 ipcMain.handle('file:readFile', async (_e, filePath) => {
-  try {
-    const buffer = await fs.readFile(filePath);
-    return buffer;
-  } catch (error) {
-    logger.error('Error reading file:', error);
-    throw error;
-  }
+  return await fs.readFile(filePath);
 });
 
-// --- Backend التحكم في الخادم ---
-ipcMain.handle('backend:restart', async () => {
-  logger.info('Restarting backend server...');
-  await backendManager.CleanupBackendProcess();
+// --- التحكم في backend (يدوي فقط) ---
+ipcMain.handle('backend:start', async () => {
   await backendManager.StartBackend();
-  await new Promise((resolve) => setTimeout(resolve, 2000));
-  logger.info('Backend server restarted successfully');
+  return { ok: true };
 });
 
 ipcMain.handle('backend:stop', async () => {
-  logger.info('Stopping backend server...');
   await backendManager.CleanupBackendProcess();
-  logger.info('Backend server stopped successfully');
+  return { ok: true };
 });
 
-ipcMain.handle('backend:start', async () => {
-  logger.info('Starting backend server...');
+ipcMain.handle('backend:restart', async () => {
+  await backendManager.CleanupBackendProcess();
   await backendManager.StartBackend();
-  await new Promise((resolve) => setTimeout(resolve, 2000));
-  logger.info('Backend server started successfully');
+  return { ok: true };
 });
 
-// --- فتح متصفح خارجي ---
+// --- فتح رابط خارجي ---
 ipcMain.handle('shell:openExternal', async (_e, url) => {
-  try {
-    await shell.openExternal(url);
-    return { success: true };
-  } catch (error) {
-    logger.error('Error opening external URL:', error);
-    return { success: false, message: error.message };
+  await shell.openExternal(url);
+  return { success: true };
+});
+
+// --- License IPC ---
+ipcMain.handle('license:getMachineId', () => getMachineId());
+
+ipcMain.handle('license:activateString', async (_e, licenseString) => {
+  saveLicenseString(licenseString);
+  return await verifyLicense();
+});
+
+ipcMain.handle('license:activateFile', async () => {
+  const { canceled, filePaths } = await dialog.showOpenDialog({
+    title: 'اختيار ملف التفعيل',
+    filters: [{ name: 'License File', extensions: ['lic'] }],
+    properties: ['openFile'],
+  });
+
+  if (canceled || !filePaths.length) return { ok: false, reason: 'no_license_file' };
+
+  const content = (await fs.readFile(filePaths[0], 'utf8')).trim();
+
+  saveLicenseString(content);
+  return await verifyLicense();
+});
+
+ipcMain.handle('license:closeActivation', async () => {
+  if (activationWindow) {
+    activationWindow.close();
+    activationWindow = null;
+  }
+
+  createWindow();
+
+  if (!backendManager.isRunning()) {
+    await backendManager.StartBackend();
+  }
+
+  return { ok: true };
+});
+
+ipcMain.handle('license:closeActivationWindow', async () => {
+  if (activationWindow) {
+    activationWindow.close();
+    activationWindow = null;
+  }
+});
+
+// auto width of activationWindow
+ipcMain.handle('window:auto-resize', async (_e, { width, height }) => {
+  if (activationWindow) {
+    const newWidth = Math.ceil(width) + 20; // إضافة بعض الحشو
+    const newHeight = Math.ceil(height) + 20; // إضافة بعض الحشو
+
+    activationWindow.setSize(newWidth, newHeight);
   }
 });

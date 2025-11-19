@@ -21,7 +21,7 @@
       <v-card-title class="d-flex justify-space-between align-center">
         <div>
           <div class="text-h5">فاتورة رقم: {{ sale.invoiceNumber }}</div>
-          <div class="text-caption text-grey">{{ toYmd(sale.createdAt) }}</div>
+          <div class="text-caption text-grey">{{ toYmdWithTime(sale.createdAt) }}</div>
         </div>
         <v-chip :color="getStatusColor(sale.status)" size="large">
           {{ getStatusText(sale.status) }}
@@ -96,16 +96,6 @@
               <p v-if="sale.paymentType === 'installment' && hasInstallments" class="mb-1">
                 <strong>عدد الأقساط: </strong>
                 <span class="text-info">{{ sale.installments.length }} قسط</span>
-              </p>
-              <p v-if="sale.paymentType === 'installment' && hasInstallments" class="mb-1">
-                <strong>قيمة القسط: </strong>
-                <span class="text-info">{{
-                  // sale total مقسوم على عدد الأقساط + الفائدة
-                  formatCurrency(
-                    (sale.total - sale.paidAmount) / sale.installments.length,
-                    sale.currency
-                  )
-                }}</span>
               </p>
               <!-- الإجمالي النهائي -->
               <v-divider
@@ -331,7 +321,7 @@
                 {{ formatCurrency(payment.amount, payment.currency) }}
               </td>
               <td class="text-center">{{ getPaymentMethodText(payment.paymentMethod) }}</td>
-              <td class="text-center">{{ toYmd(payment.createdAt) }}</td>
+              <td class="text-center">{{ toYmdWithTime(payment.createdAt) }}</td>
               <td class="text-center">{{ payment.currency }}</td>
               <td class="text-center">{{ payment.createdBy || '-' }}</td>
               <td>{{ payment.notes || '-' }}</td>
@@ -424,6 +414,17 @@ const toYmd = (date) => {
   const month = String(d.getMonth() + 1).padStart(2, '0');
   const day = String(d.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
+};
+
+// toYmd with time
+const toYmdWithTime = (date) => {
+  const d = new Date(date);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  const hours = String(d.getHours()).padStart(2, '0');
+  const minutes = String(d.getMinutes()).padStart(2, '0');
+  return `${year}-${month}-${day} ${hours}:${minutes}`;
 };
 
 const paymentMethods = [
@@ -601,6 +602,8 @@ onMounted(async () => {
   try {
     const response = await saleStore.fetchSale(route.params.id);
     sale.value = response.data;
+
+    console.log('Fetched sale details:', sale.value);
 
     if (sale.value) {
       paymentData.value.currency = sale.value.currency;

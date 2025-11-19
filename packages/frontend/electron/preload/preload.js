@@ -14,19 +14,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   stopBackend: () => ipcRenderer.invoke('backend:stop'),
   startBackend: () => ipcRenderer.invoke('backend:start'),
 
-  // تفعيل كود جديد
-  activateLicense: (licenseKey) => ipcRenderer.invoke('activate-license', licenseKey),
-
-  // إعادة التفعيل
-  reactivateLicense: (licenseKey) => ipcRenderer.invoke('reactivate-license', licenseKey),
-
-  // الحصول على معلومات الكود الحالي
-  getLicenseInfo: () => ipcRenderer.invoke('get-license-info'),
-
-  // إلغاء التفعيل
-  deactivateLicense: () => ipcRenderer.invoke('deactivate-license'),
-
-  logToMain: (message) => ipcRenderer.invoke('logToMain', message),
-
   openExternal: (url) => ipcRenderer.invoke('shell:openExternal', url),
+  setSize: (width, height) => ipcRenderer.invoke('window:auto-resize', { width, height }),
+  invoke: (channel, data) => ipcRenderer.invoke(channel, data),
 });

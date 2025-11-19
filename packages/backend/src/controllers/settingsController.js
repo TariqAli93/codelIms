@@ -328,7 +328,7 @@ export class SettingsController {
 
       // Additional confirmation check
       const { confirmationToken } = request.body;
-      if (confirmationToken !== 'RESET_CODELIMS_APPLICATION') {
+      if (confirmationToken !== 'RESET_nuqtaplus_APPLICATION') {
         return reply.status(400).send({
           success: false,
           message: 'Invalid confirmation token',
@@ -436,7 +436,7 @@ export class SettingsController {
   async createBackup(request, reply) {
     try {
       // find database path
-      const defaultFile = path.resolve(process.cwd(), 'data', 'codelims.db');
+      const defaultFile = path.resolve(process.cwd(), 'data', 'nuqtaplus.db');
       const envSource = process.env.DATABASE_URL || process.env.DB_FILE || process.env.SQLITE_FILE;
       const resolved = resolveFromEnv(envSource) || defaultFile;
 
@@ -557,7 +557,7 @@ export class SettingsController {
     const T = Date.now();
     try {
       // 1) حدد مسار القاعدة
-      const defaultFile = path.resolve(process.cwd(), 'data', 'codelims.db');
+      const defaultFile = path.resolve(process.cwd(), 'data', 'nuqtaplus.db');
       const envSource = process.env.DATABASE_URL || process.env.DB_FILE || process.env.SQLITE_FILE;
       const resolved = typeof resolveFromEnv === 'function' ? resolveFromEnv(envSource) : envSource;
       const dbFile = resolved || defaultFile;
@@ -636,14 +636,14 @@ export class SettingsController {
 
       // محاولة تراجع: إن بقي ملف .new ولم يتم الاستبدال، امسحه
       try {
-        const newGlob = `${path.resolve(process.cwd(), 'data', 'codelims.db')}.new-${T}.db`;
+        const newGlob = `${path.resolve(process.cwd(), 'data', 'nuqtaplus.db')}.new-${T}.db`;
         await fs.unlink(newGlob);
       } catch {}
 
       // إن كان هناك .old ولم نكمل الاستبدال، حاول إرجاعه إلى اسم القاعدة
       try {
-        const oldGlob = `${path.resolve(process.cwd(), 'data', 'codelims.db')}.old-${T}.db`;
-        const dbFile = path.resolve(process.cwd(), 'data', 'codelims.db');
+        const oldGlob = `${path.resolve(process.cwd(), 'data', 'nuqtaplus.db')}.old-${T}.db`;
+        const dbFile = path.resolve(process.cwd(), 'data', 'nuqtaplus.db');
         const existsOld = await fs
           .access(oldGlob)
           .then(() => true)

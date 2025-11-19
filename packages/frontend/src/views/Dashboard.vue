@@ -76,7 +76,7 @@
         :key="action.title"
         :to="action.to"
         color="sureface"
-        :disabled="authStore.hasPermission(action.permission) === false"
+        v-can="action.permission"
         class="group relative block rounded-2xl border border-gray-200 p-5 translate transition-all hover:scale-102 hover:shadow-2xl dark:border-gray-700 overflow-hidden"
       >
         <!-- Animated background gradient -->
@@ -241,13 +241,11 @@ import { ref, onMounted, watchEffect, onUnmounted } from 'vue';
 import { useSaleStore } from '@/stores/sale';
 import { useProductStore } from '@/stores/product';
 import { useCustomerStore } from '@/stores/customer';
-import { useAuthStore } from '@/stores/auth';
 import { useLoading } from '@/composables/useLoading';
 
 const saleStore = useSaleStore();
 const productStore = useProductStore();
 const customerStore = useCustomerStore();
-const authStore = useAuthStore();
 const { useAsyncData } = useLoading();
 
 const loading = ref(false);
